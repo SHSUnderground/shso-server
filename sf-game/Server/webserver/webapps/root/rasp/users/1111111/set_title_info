@@ -1,0 +1,10 @@
+<response>
+  <status>200</status>
+  <headers>
+    <Content-Type>application/xml; charset=UTF-8</Content-Type>
+  </headers>
+  <body>&lt;bank&gt;
+  &lt;player_id&gt;1&lt;/player_id&gt;
+&lt;/bank&gt;
+</body>
+</response>

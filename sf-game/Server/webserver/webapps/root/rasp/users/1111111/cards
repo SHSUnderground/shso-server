@@ -1,0 +1,10 @@
+<response>
+  <status>200</status>
+  <headers>
+    <Content-Type>application/xml; charset=UTF-8</Content-Type>
+  </headers>
+  <body>&lt;cards&gt;
+ 
+&lt;/cards&gt;
+</body>
+</response>

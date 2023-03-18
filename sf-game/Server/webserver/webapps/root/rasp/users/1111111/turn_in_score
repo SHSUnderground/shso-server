@@ -1,0 +1,7 @@
+<response>
+  <status>200</status>
+  <headers>
+    <Content-Type>text/html; charset=utf-8</Content-Type>
+  </headers>
+  <body>OK</body>
+</response>

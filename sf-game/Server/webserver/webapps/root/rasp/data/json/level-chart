@@ -1,0 +1,7 @@
+<response>
+  <status>200</status>
+  <headers>
+    <Content-Type>application/json; charset=UTF-8</Content-Type>
+  </headers>
+  <body>{"level-chart": [{"level": 1, "start": 0}, {"level": 2, "start": 100}, {"level": 3, "start": 400}, {"level": 4, "start": 900}, {"level": 5, "start": 1600}, {"level": 6, "start": 2500}, {"level": 7, "start": 3600}, {"level": 8, "start": 4900}, {"level": 9, "start": 6400}, {"level": 10, "start": 8100}, {"level": 11, "start": 10000}, {"level": 12, "start": 12000}, {"level": 13, "start": 14500}, {"level": 14, "start": 17000}, {"level": 15, "start": 20000}, {"level": 16, "start": 23000}, {"level": 17, "start": 27000}, {"level": 18, "start": 31000}, {"level": 19, "start": 35000}, {"level": 20, "start": 40000}, {"level": 21, "start": 45000}, {"level": 22, "start": 50000}, {"level": 23, "start": 55000}, {"level": 24, "start": 60000}, {"level": 25, "start": 66000}, {"level": 26, "start": 72000}, {"level": 27, "start": 79000}, {"level": 28, "start": 86000}, {"level": 29, "start": 93000}, {"level": 30, "start": 100000}, {"level": 31, "start": 108000}, {"level": 32, "start": 116000}, {"level": 33, "start": 125000}, {"level": 34, "start": 134000}, {"level": 35, "start": 144000}, {"level": 36, "start": 154000}, {"level": 37, "start": 165000}, {"level": 38, "start": 176000}, {"level": 39, "start": 188000}, {"level": 40, "start": 200000}]}</body>
+</response>

@@ -1,0 +1,231 @@
+<!--
+
+	SmartFoxServer PRO 
+	(c) 2004-2009 gotoAndPlay()
+	www.gotoandplay.it
+	www.smartfoxserver.com
+	
+	Main Configuration file
+	version 1.6.6
+	
+	NOTE:
+	You can find detailed informations on how to configure the server by reading
+	the tutorials in section 2 of the documentation.
+	( http://www.smartfoxserver.com/docs/docPages/config/basics.htm )
+	
+-->
+
+<SmartFoxConfig>
+	
+	<ServerSetup>
+		<!-- 
+			Specify an ip address or use an asterisk(*) to bind all available IPs
+		-->
+		<H2EnginePort>9010</H2EnginePort>
+		<ServerIP>*</ServerIP>
+		<ServerPort>9339</ServerPort>
+		
+		<AutoSendPolicyFile>true</AutoSendPolicyFile>
+			<PolicyAllowedDomains>
+			    <AllowedDomain>*</AllowedDomain>
+         <AllowedDomain>192.168.0.4</AllowedDomain>
+         <AllowedDomain>localhost</AllowedDomain>
+			    <AllowedDomain>smartfoxserver.com</AllowedDomain>
+			</PolicyAllowedDomains>
+		<MaxUserIdleTime>300</MaxUserIdleTime>
+		<MaxSocketIdleTime>60</MaxSocketIdleTime>
+		
+		<!-- Server Variables limits (-1 = unlimited) -->
+		<MaxRoomVars>-1</MaxRoomVars>
+		<MaxUserVars>-1</MaxUserVars>
+		
+		<!-- New since 1.6.3, optimizes user variables size -->
+		<UserVarsOptimization>true</UserVarsOptimization>
+		
+		<AntiFlood active="false">
+			<MinMsgTime tolerance="5">1000</MinMsgTime>
+			<MaxRepeatedMessages>3</MaxRepeatedMessages>
+			<WarningsBeforeKick>2</WarningsBeforeKick>
+			<WarningMessage><![CDATA[No flooding allowed!)]]></WarningMessage>
+			<KickMessage><![CDATA[You've been warned! No flooding! Now you're kicked]]></KickMessage>
+			<BanMessage><![CDATA[Stop Flooding!! You're being banned]]></BanMessage>			
+			<BanAfter timeSpan="1">3</BanAfter>
+		</AntiFlood>
+		
+		<BadWordsFilter active="false">
+			<FilterMode>filter</FilterMode> <!-- REMOVE or FILTER -->
+			<StripCharacters><![CDATA[,.;:_!$%&/#*-+]]></StripCharacters>
+			<Warnings>false</Warnings>
+			<FilterRoomNames>true</FilterRoomNames>
+			<FilterUserNames>true</FilterUserNames>
+			<WarningsBeforeKick>3</WarningsBeforeKick>
+			<WarningMessage><![CDATA[No swearing!)]]></WarningMessage>
+			<KickMessage><![CDATA[You've been warned! No Swearing! Now you're kicked]]></KickMessage>
+			<BanMessage><![CDATA[Stop Swearing! You're being banned!]]></BanMessage>	
+			<BanAfter timeSpan="1000">3000</BanAfter>
+			
+			<BadWordsList>				
+				<badWord>dickhead</badWord>
+				<badWord>asshole</badWord>
+				<badWord>shithead</badWord>
+				<badWord>shit</badWord>
+				<badWord>fucking</badWord>
+				<badWord>fuck</badWord>
+				<badWord>dickhead</badWord>
+				<badWord>bastard</badWord>
+				<badWord>nigger</badWord>
+				<badWord>idiot</badWord>
+				<badWord>bitch</badWord>
+			</BadWordsList>
+		</BadWordsFilter>
+		
+		<BanCleaning>auto</BanCleaning>
+		<BanDuration>1800</BanDuration> <!-- 30 min -->
+		<BannedLoginMessage>You have been banned!</BannedLoginMessage>
+		
+		<OutQueueThreads>1</OutQueueThreads>
+		<ExtHandlerThreads>1</ExtHandlerThreads>
+		<MaxWriterQueue>50</MaxWriterQueue>
+		
+		<!-- 
+			New since 1.6.0 
+			Set the client queue size and the max. allowed dropped packets
+		-->
+		<ClientMessagQueue>
+			<QueueSize>100</QueueSize>
+			<MaxAllowedDroppedPackets>10</MaxAllowedDroppedPackets>
+		</ClientMessagQueue>
+		
+		<MaxIncomingQueue>5000</MaxIncomingQueue>
+		<DeadChannelsPolicy>strict</DeadChannelsPolicy>
+		<MaxMsgLen>4096</MaxMsgLen>
+		
+		<LogMaxSize>5000000</LogMaxSize>
+		<LogMaxFiles>5</LogMaxFiles>
+		
+		<!--
+			Available options are:
+			
+			FINEST
+			FINER
+			FINE
+			CONFIG
+			INFO
+			WARNING
+			SEVERE
+
+		-->
+		<FileLoggingLevel>INFO</FileLoggingLevel>
+		<ConsoleLoggingLevel>INFO</ConsoleLoggingLevel>	
+		
+		<!-- Adminisitrator login -->
+		<AdminLogin>sfs_admin</AdminLogin>
+		<AdminPassword>sfs_pass</AdminPassword>
+		
+		<!-- Allowed administrator IP addresses -->
+		<AdminAllowedAddresses>
+			<AllowedAddress>*.*.*.*</AllowedAddress>
+		</AdminAllowedAddresses>
+		
+		<!-- Allow remote debugging of extensions -->
+		<ExtensionRemoteDebug>true</ExtensionRemoteDebug>
+		
+		<!-- 
+			Allow global autoreload of extensions upon file save 
+			You should specify in each Zone if the autoreload is enabled.
+		-->
+		<AutoReloadExtensions>true</AutoReloadExtensions>
+		
+		<ExtensionRemoteDebug>true</ExtensionRemoteDebug>
+		
+		<IpFilter>0</IpFilter>
+		
+		<Mailer>
+			<MailHost>test.mail.com</MailHost>
+			<MailUser>foo</MailUser>
+			<MailPass>bar</MailPass>
+			<SmtpPort>25</SmtpPort>
+			<WorkerThreads>1</WorkerThreads>
+		</Mailer>
+		
+		<!-- Enable / Disable remote zone info -->
+		<EnableZoneInfo>false</EnableZoneInfo>
+		
+		<!-- Enable / Disable embedded webserver -->
+		<WebServer active="true">
+			<CfgFile>webserver/cfg/jetty.xml</CfgFile>
+		</WebServer>
+		
+		<!--  raw custom protocol separator --> 
+		<RawProtocolSeparator><![CDATA[%]]></RawProtocolSeparator>
+		
+		<!-- Enable NPCs -->
+		<EnableNPC>true</EnableNPC>
+		
+		<!-- Use concurrent map for properties objects -->
+		<DynamicPropertiesClass>java.util.concurrent.ConcurrentHashMap</DynamicPropertiesClass>
+		
+		<!-- Send a message to client, on wrong Zone. DISABLE THIS ONE IN PRODUCTION
+		<WarnOnWrongZoneRequest><![CDATA[Invalid zone: %s]]></WarnOnWrongZoneRequest>
+		-->
+	</ServerSetup>
+	
+	
+	
+	<!--
+		Zones Configuration.
+	-->
+	<Zones>	
+	
+		<Zone name="shs.all" uCountUpdate="true" buddyList="20" maxUsers="4000" customLogin="true">
+			<AutoReloadExtensions>true</AutoReloadExtensions>
+			<Rooms>
+				<Room name="lobby" maxUsers="50" isPrivate="false" isTemp="false" autoJoin="true" uCountUpdate="true" />				
+				<Room name="Daily_Bugle" maxUsers="50" isPrivate="false" isGame="false" isTemp="false" autoJoin="true" />
+				<Room name="The Garden" maxUsers="50" isPrivate="false" isTemp="false" />
+				<Room name="The Bathroom" maxUsers="50" isPrivate="false" isTemp="false" />
+				<Room name="The Garage" maxUsers="50" isPrivate="false" isTemp="false" />
+				<Room name="The Living Room" maxUsers="50" isPrivate="true" isTemp="false" pwd="test" />
+			</Rooms>
+
+			 <Extensions>
+				<extension name="basic"  className="shso-basic.py" type="python" />
+        			<extension name="events"  className="shso-events.as" type="script" />  
+				<extension name="escrow"  className="shso-escrow.as" type="script" /> 
+        			<extension name="maitred"  className="shso-maitred.py" type="python" />
+				<extension name="uservars"  className="shso-uservars.as" type="script" />
+       			 </Extensions>
+
+			 <DatabaseManager active="true">
+				
+				<!-- <Driver>org.gjt.mm.mysql.Driver</Driver> -->
+				<Driver>com.mysql.jdbc.Driver</Driver>
+				<ConnectionString>jdbc:mysql://127.0.0.1:3306/shso?useSSL=false</ConnectionString>
+				
+				<!-- 8.0.19 -->
+				<UserName><!--DB Username here--></UserName>
+				<Password><!--DB Password here--></Password>
+				
+				<!--
+				Example connecting to MySQL
+				
+				<Driver>org.gjt.mm.mysql.Driver</Driver>
+				<ConnectionString>jdbc:mysql://192.168.0.1:3306/sfsTest</ConnectionString>
+				-->
+				
+				
+				<TestSQL><![CDATA[SELECT COUNT(*) FROM user]]></TestSQL>
+				
+				<MaxActive>10</MaxActive>
+				<MaxIdle>10</MaxIdle>
+				
+				<OnExhaustedPool>fail</OnExhaustedPool>
+				<BlockTime>5000</BlockTime>
+					
+			</DatabaseManager>
+		</Zone>
+			
+	</Zones>
+	
+	
+</SmartFoxConfig>

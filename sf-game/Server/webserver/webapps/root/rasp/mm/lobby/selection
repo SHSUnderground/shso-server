@@ -1,0 +1,10 @@
+<response>
+  <status>200</status>
+  <headers>
+    <Content-Type>application/xml; charset=UTF-8</Content-Type>
+  </headers>
+  <body>&lt;servers&gt;
+  &lt;notification&gt;192.168.75.999:9389&lt;/notification&gt;
+&lt;/servers&gt;
+</body>
+</response>

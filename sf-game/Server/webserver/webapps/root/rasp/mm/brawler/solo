@@ -1,0 +1,50 @@
+<response>
+  <status>200</status>
+  <headers>
+    <Content-Type>application/xml; charset=UTF-8</Content-Type>
+  </headers>
+  <body>&lt;ticket&gt;
+  &lt;player_id&gt;1675&lt;/player_id&gt;
+  &lt;player_name&gt;sirBadDoggo&lt;/player_name&gt;
+  &lt;subscriber&gt;1&lt;/subscriber&gt;
+  &lt;session_key&gt;720f98cb79e59f0e6eb2c758915c53978fb0af09d7e5db86edcfd399168bc07c&lt;/session_key&gt;
+  &lt;squad_level&gt;6924&lt;/squad_level&gt;
+  &lt;entitlements&gt;
+    &lt;ArcadeAllow&gt;1&lt;/ArcadeAllow&gt;
+    &lt;CardGameAllow&gt;1&lt;/CardGameAllow&gt;
+    &lt;CatalogCountry&gt;US&lt;/CatalogCountry&gt;
+    &lt;ClientConsoleAllow&gt;0&lt;/ClientConsoleAllow&gt;
+    &lt;DemoLimitsOn&gt;0&lt;/DemoLimitsOn&gt;
+    &lt;Expiration&gt;0&lt;/Expiration&gt;
+    &lt;IsPayingSubscriber&gt;1&lt;/IsPayingSubscriber&gt;
+    &lt;MaxChallengeLevel&gt;65&lt;/MaxChallengeLevel&gt;
+    &lt;OpenChatAllow&gt;1&lt;/OpenChatAllow&gt;
+    &lt;ParentalCardGameDeny&gt;0&lt;/ParentalCardGameDeny&gt;
+    &lt;ParentalFriendingDeny&gt;0&lt;/ParentalFriendingDeny&gt;
+    &lt;ParentalHQDeny&gt;0&lt;/ParentalHQDeny&gt;
+    &lt;ParentalMissionsDeny&gt;0&lt;/ParentalMissionsDeny&gt;
+    &lt;PlayerCountry&gt;US&lt;/PlayerCountry&gt;
+    &lt;PlayerLanguage&gt;en&lt;/PlayerLanguage&gt;
+    &lt;ShieldHQAllow&gt;1&lt;/ShieldHQAllow&gt;
+    &lt;ShieldHeroesAllow&gt;1&lt;/ShieldHeroesAllow&gt;
+    &lt;ShieldPlayAllow&gt;1&lt;/ShieldPlayAllow&gt;
+    &lt;ShieldPrizeWheelAllow&gt;1&lt;/ShieldPrizeWheelAllow&gt;
+    &lt;ShoppingCatalog&gt;1&lt;/ShoppingCatalog&gt;
+    &lt;SubscriptionType&gt;1&lt;/SubscriptionType&gt;
+    &lt;UnityEditorAllow&gt;0&lt;/UnityEditorAllow&gt;
+    &lt;UseExternalShopping&gt;0&lt;/UseExternalShopping&gt;
+    &lt;WIPAllow&gt;0&lt;/WIPAllow&gt;
+  &lt;/entitlements&gt;
+  &lt;created /&gt;
+  &lt;cap&gt;1&lt;/cap&gt;
+  &lt;csp&gt;csp-added-MAYHEM&lt;/csp&gt;
+  &lt;mission&gt;m_100X_1_Sabretooth001&lt;/mission&gt;
+  &lt;server&gt;217.160.145.95:9339&lt;/server&gt;
+  &lt;instance&gt;54181934&lt;/instance&gt;
+  &lt;game&gt;BRAWLER&lt;/game&gt;
+  &lt;allowed_users&gt;1675&lt;/allowed_users&gt;
+  &lt;timestamp&gt;2016-05-16T18:14:20.753392&lt;/timestamp&gt;
+  &lt;code&gt;3e47d6ee069d21ea6cf183f4b726759c5cbd6df83d43c097be4beb0b2c3eaa13&lt;/code&gt;
+&lt;/ticket&gt;
+</body>
+</response>

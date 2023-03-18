@@ -1,0 +1,13 @@
+<response>
+  <status>400</status>
+  <headers>
+    <Content-Type>application/xml; charset=UTF-8</Content-Type>
+  </headers>
+  <body>&lt;currency&gt;
+    &lt;tokens&gt;2&lt;/tokens&gt;
+    &lt;coins&gt;2&lt;/coins&gt;
+    &lt;tickets&gt;2&lt;/tickets&gt;
+    &lt;shards&gt;2&lt;/shards&gt;	
+&lt;/currency&gt;
+</body>
+</response>

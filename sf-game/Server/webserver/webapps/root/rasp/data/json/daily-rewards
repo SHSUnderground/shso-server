@@ -1,0 +1,7 @@
+<response>
+  <status>200</status>
+  <headers>
+    <Content-Type>application/json; charset=UTF-8</Content-Type>
+  </headers>
+  <body>{"daily_rewards": [{"day_id": 1, "reward_quantity": 25, "reward_category": "s", "track_id": 1}, {"day_id": 2, "reward_quantity": 75, "reward_category": "s", "track_id": 1}, {"day_id": 3, "reward_quantity": 225, "reward_category": "s", "track_id": 1}, {"day_id": 4, "reward_quantity": 5, "reward_category": "t", "track_id": 1}, {"day_id": 5, "reward_quantity": 10, "reward_category": "t", "track_id": 1}, {"day_id": 6, "reward_quantity": 15, "reward_category": "t", "track_id": 1}, {"day_id": 7, "reward_quantity": 30, "reward_category": "t", "track_id": 1}, {"day_id": 8, "reward_quantity": 5, "reward_category": "g", "track_id": 1}, {"day_id": 1, "reward_quantity": 50, "reward_category": "s", "track_id": 2}, {"day_id": 2, "reward_quantity": 150, "reward_category": "s", "track_id": 2}, {"day_id": 3, "reward_quantity": 450, "reward_category": "s", "track_id": 2}, {"day_id": 4, "reward_quantity": 10, "reward_category": "t", "track_id": 2}, {"day_id": 5, "reward_quantity": 20, "reward_category": "t", "track_id": 2}, {"day_id": 6, "reward_quantity": 30, "reward_category": "t", "track_id": 2}, {"day_id": 7, "reward_quantity": 10, "reward_category": "g", "track_id": 2}, {"day_id": 8, "reward_quantity": 20, "reward_category": "g", "track_id": 2}]}</body>
+</response>

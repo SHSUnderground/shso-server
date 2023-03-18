@@ -1,0 +1,51 @@
+body
+{
+	margin: 0px;
+	background-color: #ff3300;
+	background-image: url('images/gradient-top.gif');
+	background-repeat: repeat-x;
+	background-position: top left;
+	
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 80%;
+}
+
+a
+{
+	color: #990000;
+	text-decoration: none;
+}
+
+a:hover
+{
+	text-decoration: underline;
+}
+
+#header
+{
+	padding-top: 15px;
+	padding-left: 15px;
+}
+
+#content
+{
+	background-color: white;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+#footer
+{
+	background-image: url('images/bottom-edge.gif');
+	background-repeat: repeat-x;
+	color: white;
+	font-size: 11px;
+	text-align: center;
+}
+
+.bigTitle
+{
+	color: #ff3300;
+	font: 160% Georgia, Verdana, Arial, sans-serif;
+	font-weight: bold;
+}

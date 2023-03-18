@@ -1,0 +1,7 @@
+<response>
+  <status>200</status>
+  <headers>
+    <Content-Type>application/json; charset=UTF-8</Content-Type>
+  </headers>
+  <body>{"daily_quest": {"ownable_type_id": 4008}}</body>
+</response>
