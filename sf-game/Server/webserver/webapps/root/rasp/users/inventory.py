@@ -15,6 +15,12 @@ ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
+def escapeQuotes(string):
+	string2 = str(string).replace( '"', '\"')
+	string2 = string2.replace( "'", "\'")
+	string2 = string2.replace("\\", "\\\\")
+	return string2
+
 class inventory(HttpServlet):
 
 	def __init__(self):
@@ -34,7 +40,7 @@ class inventory(HttpServlet):
 		if (pylibcsp.ipcheck(False)):   # don't process request if not a valid client
 			return
 		# fileList = ["POST Request Recieved"]
-		# outfile = open("sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
+		# outfile = open("sf-game/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
 		# outfile.writelines(fileList)
 		# outfile.close()
 		# userID = None
@@ -61,7 +67,7 @@ class inventory(HttpServlet):
 				session_token = request.getParameter(name)
 
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
+			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
 			tokenQuery = db.executeQuery(getUserID)
 			# userID = None
 			
@@ -73,7 +79,7 @@ class inventory(HttpServlet):
 		# Get db record for this player
 		error = ""
 		usersStr = ""
-		sql = "SELECT user.* FROM shso.user user WHERE user.ID = " + userID
+		sql = "SELECT user.* FROM shso.user user WHERE user.ID = " + escapeQuotes(userID) 
 
 		queryRes = db.executeQuery(sql)
 		if (queryRes == None) or (queryRes.size() == 0):
@@ -82,7 +88,7 @@ class inventory(HttpServlet):
 		# Get all owned characters for this player
 		error = ""
 		usersStr = ""
-		sql = "SELECT shso.inventory.* FROM shso.inventory, shso.user WHERE shso.inventory.UserID = shso.user.ID AND shso.user.ID = " + userID
+		sql = "SELECT shso.inventory.* FROM shso.inventory, shso.user WHERE shso.inventory.UserID = shso.user.ID AND shso.user.ID = " + escapeQuotes(userID) 
 
 
 		queryRes2 = db.executeQuery(sql)
@@ -117,7 +123,7 @@ class inventory(HttpServlet):
 		w.println("\n  <body>&lt;masterinventory&gt;")
 		w.println("\n  &lt;inventory&gt;")
 		temp_inven = []
-		inventory_file = open('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/rasp/users/inventory.xml', 'r')
+		inventory_file = open('sf-game/Server/webserver/webapps/root/rasp/users/inventory.xml', 'r')
 		for line in inventory_file.readlines():
 			w.println(line)
 			temp_inven.append(line)
@@ -149,7 +155,7 @@ class inventory(HttpServlet):
 		w.println("\n  &lt;/masterinventory&gt;")
 		w.println("\n</body>")
 		w.println("\n</response>")
-		# outfile = open("sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
+		# outfile = open("sf-game/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
 		# outfile.writelines(fileList)
 		# outfile.close()
 

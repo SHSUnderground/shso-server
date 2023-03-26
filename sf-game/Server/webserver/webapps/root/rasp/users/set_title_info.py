@@ -15,6 +15,14 @@ ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
+
+def escapeQuotes(string):
+	string2 = str(string).replace( '"', '\"')
+	string2 = string2.replace( "'", "\'")
+	string2 = string2.replace("\\", "\\\\")
+	return string2
+
+
 class set_title_info(HttpServlet):
 
 	def __init__(self):
@@ -65,7 +73,7 @@ class set_title_info(HttpServlet):
 				medallion_id = request.getParameter(name)
 
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
+			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
 			tokenQuery = db.executeQuery(getUserID)
 			# userID = None
 			

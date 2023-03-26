@@ -15,6 +15,12 @@ ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
+def escapeQuotes(string):
+	string2 = str(string).replace( '"', '\"')
+	string2 = string2.replace( "'", "\'")
+	string2 = string2.replace("\\", "\\\\")
+	return string2
+
 class friendsadd(HttpServlet):
 
 	def __init__(self):
@@ -61,7 +67,7 @@ class friendsadd(HttpServlet):
 				pname = request.getParameter(name)
 
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
+			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
 			tokenQuery = db.executeQuery(getUserID)
 			# userID = None
 			
@@ -73,7 +79,7 @@ class friendsadd(HttpServlet):
 		# Get potential friend's ID from name
 		error = ""
 		friendID = 0
-		sql = "SELECT user.ID FROM shso.user user WHERE user.Username = '" + value + "'"
+		sql = "SELECT user.ID FROM shso.user user WHERE user.Username = '" + escapeQuotes(value) + "'"
 		queryRes = db.executeQuery(sql)
 		if (queryRes == None) or (queryRes.size() == 0):
 			error = "db query failed"			

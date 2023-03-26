@@ -16,6 +16,12 @@ ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
+def escapeQuotes(string):
+	string2 = str(string).replace( '"', '\"')
+	string2 = string2.replace( "'", "\'")
+	string2 = string2.replace("\\", "\\\\")
+	return string2
+
 class potion(HttpServlet):
 
 	def __init__(self):
@@ -80,7 +86,7 @@ class potion(HttpServlet):
 		#target = 3900009  # temp for testing	
 							
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
+			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
 			tokenQuery = db.executeQuery(getUserID)
 			# userID = None
 			
@@ -108,7 +114,7 @@ class potion(HttpServlet):
 		error = ""
 		shard_price = 999999
 		category = " "
-		sql = "SELECT name FROM shso.catalog WHERE ownable_type_id = " + str(ownable_type_id);
+		sql = "SELECT name FROM shso.catalog WHERE ownable_type_id = " + escapeQuotes(str(ownable_type_id));
 		queryRes = db.executeQuery(sql)
 		responseBody = ""
 		if (queryRes == None) or (queryRes.size() == 0):
@@ -122,7 +128,7 @@ class potion(HttpServlet):
 		error = ""
 		fractals = -1
 		quantity = 0
-		sql = "SELECT quantity FROM shso.inventory WHERE UserID = " + str(playerID) + " AND type = " + str(ownable_type_id)
+		sql = "SELECT quantity FROM shso.inventory WHERE UserID = " + escapeQuotes(str(playerID)) + " AND type = " + escapeQuotes(str(ownable_type_id)) 
 		queryRes = db.executeQuery(sql)
 		if (queryRes == None) or (queryRes.size() == 0):
 			error = "db query failed"

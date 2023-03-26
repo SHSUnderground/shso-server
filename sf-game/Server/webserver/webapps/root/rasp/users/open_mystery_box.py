@@ -13,7 +13,13 @@ ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
 sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
-import pylibcsp 
+import pylibcsp
+
+def escapeQuotes(string):
+	string2 = str(string).replace( '"', '\"')
+	string2 = string2.replace( "'", "\'")
+	string2 = string2.replace("\\", "\\\\")
+	return string2
 
 class open_mystery_box(HttpServlet):
 
@@ -60,9 +66,9 @@ class open_mystery_box(HttpServlet):
 				# userID = request.getParameter(name)
 			if (name == "AS_SESSION_KEY"):
 				session_token = request.getParameter(name)
-		getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
+		# getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
+			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
 			tokenQuery = db.executeQuery(getUserID)
 			# userID = None
 			

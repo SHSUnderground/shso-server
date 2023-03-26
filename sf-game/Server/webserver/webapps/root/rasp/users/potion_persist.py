@@ -16,8 +16,14 @@ ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
 sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
-sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/rasp/users')
 import pylibcsp 
+
+def escapeQuotes(string):
+	string2 = str(string).replace( '"', '\"')
+	string2 = string2.replace( "'", "\'")
+	string2 = string2.replace("\\", "\\\\")
+	return string2
+
 
 class potion_persist(HttpServlet):
 
@@ -87,7 +93,7 @@ class potion_persist(HttpServlet):
 
 		er = ""
 		expiredPotions = ""
-		potionDuration = 1 #In Minutes
+		potionDuration = 60 #In Minutes
 		shsoID = None
 		sfsID = None
 		
@@ -96,7 +102,7 @@ class potion_persist(HttpServlet):
 				if name == "shsoid":   # AS_SESSION_KEY
 					shsoID = int(request.getParameter(name))
 
-			sql = "select ownable_type_id, SfUserId, IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>"+str(potionDuration)+",'T','F') FROM active_players, active_potion_effects WHERE ShsoUserId="+str(shsoID)+";"
+			sql = "select ownable_type_id, SfUserId, IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>"+escapeQuotes(str(potionDuration))+",'T','F') FROM active_players, active_potion_effects WHERE ShsoUserId="+escapeQuotes(str(shsoID))+";"
 			queryRes = db.executeQuery(sql)
 			if ( queryRes == None) or (queryRes.size() == 0):
 				pass
@@ -108,12 +114,15 @@ class potion_persist(HttpServlet):
 						pass
 					else:
 						ownableID = int(row.getItem("ownable_type_id"))
-						expiredCheck = str(row.getItem("IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>1,'T','F')"))
+						expiredCheck = str(row.getItem("IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>60,'T','F')"))
 						if expiredCheck == "T":
 							#Potion has expired!!!
 							expiredPotions = expiredPotions +str(ownableID)+","+str(sfsID) + "|"
-		except Exception,e:
+							sql = "DELETE FROM active_potion_effects WHERE userid=" + escapeQuotes(str(playerID))
+							db.executeCommand(sql)
+		except Exception as e:
 			er = str(e)
+			_server.trace(er)
 
 		
 
@@ -144,7 +153,7 @@ class potion_persist(HttpServlet):
 				#Remove that potion from the DB
 				#sql = "DELETE FROM active_potion_effects WHERE shsoid = " + str(shsoID) + " AND ownable_type_id = " str(potion[1])
 				#success = db.executeCommand(sql)"""
-		except Exception,e:
+		except Exception as e:
 			w.println(str(e))
 
 		#w.println("  &lt;/persist&gt;")

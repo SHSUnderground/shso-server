@@ -16,6 +16,12 @@ ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
+def escapeQuotes(string):
+	string2 = str(string).replace( '"', '\"')
+	string2 = string2.replace( "'", "\'")
+	string2 = string2.replace("\\", "\\\\")
+	return string2
+
 class counters(HttpServlet):
 
 	def __init__(self):
@@ -110,7 +116,7 @@ class counters(HttpServlet):
 		w.println("  </headers>")
 		w.println("  <body>")
 		# w.println(responseBody)
-		counters_file = open('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/rasp/users/counters.xml', 'r')
+		counters_file = open('sf-game/Server/webserver/webapps/root/rasp/users/counters.xml', 'r')
 		for line in counters_file.readlines():
 			w.println(line)
 		counters_file.close()

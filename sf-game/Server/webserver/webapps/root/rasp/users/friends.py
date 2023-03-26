@@ -15,6 +15,12 @@ ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
+def escapeQuotes(string):
+	string2 = str(string).replace( '"', '\"')
+	string2 = string2.replace( "'", "\'")
+	string2 = string2.replace("\\", "\\\\")
+	return string2
+
 class friends(HttpServlet):
 
 	def __init__(self):
@@ -59,7 +65,7 @@ class friends(HttpServlet):
 				session_token = request.getParameter(name)
 
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
+			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
 			tokenQuery = db.executeQuery(getUserID)
 			# userID = None
 			
@@ -80,7 +86,7 @@ class friends(HttpServlet):
 		 			CROSS JOIN shso.friends friends
 		 			INNER JOIN shso.user usertab ON (friends.PlayerID = usertab.ID)
 				WHERE  usertab.ID = friends.PlayerID
-		  			AND usertab.ID = """ + scriptPath + """ 
+		  			AND usertab.ID = """ + escapeQuotes(scriptPath) + """ 
 		  			AND friends.FriendID = active_players.ShsoUserID
 			);
 			"""
@@ -98,7 +104,7 @@ class friends(HttpServlet):
 	FROM shso.friends friends
 		 INNER JOIN shso.user usertab ON (friends.PlayerID = usertab.ID)
 	WHERE  usertab.ID = friends.PlayerID
-		  AND usertab.ID = """ + scriptPath + """ 
+		  AND usertab.ID = """ + escapeQuotes(scriptPath) + """ 
 		  AND friends.FriendID NOT IN (SELECT active_players.ShsoUserID as FriendID FROM active_players)
 );
 			"""

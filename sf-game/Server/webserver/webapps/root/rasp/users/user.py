@@ -15,6 +15,14 @@ ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
+
+def escapeQuotes(string):
+	string2 = str(string).replace( '"', '\"')
+	string2 = string2.replace( "'", "\'")
+	string2 = string2.replace("\\", "\\\\")
+	return string2
+
+
 class user(HttpServlet):
 
 	def __init__(self):
@@ -59,7 +67,7 @@ class user(HttpServlet):
 	
 		
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
+			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
 			tokenQuery = db.executeQuery(getUserID)
 			# userID = None
 			
@@ -69,7 +77,7 @@ class user(HttpServlet):
 			# userID = 
 	
 		# fileList = ["POST Request Recieved"]
-        # outfile = open("sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
+        # outfile = open("sf-game/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
         # outfile.writelines(fileList)
 
 		# Get a reference to the Extension we want to call 
@@ -81,7 +89,7 @@ class user(HttpServlet):
 		error = ""
 		usersStr = ""
 		fractals = -1
-		sql = "SELECT user.* FROM shso.user user WHERE user.ID = " + userID
+		sql = "SELECT user.* FROM shso.user user WHERE user.ID = " + escapeQuotes(userID)
 
 		queryRes = db.executeQuery(sql)
 		if (queryRes == None) or (queryRes.size() == 0):
@@ -97,7 +105,7 @@ class user(HttpServlet):
 		# Get all owned characters for this player
 		error = ""
 		usersStr = ""
-		sql = "SELECT heroes.* FROM shso.heroes, shso.user WHERE heroes.UserID = user.ID AND user.ID = " + userID
+		sql = "SELECT heroes.* FROM shso.heroes, shso.user WHERE heroes.UserID = user.ID AND user.ID = " + escapeQuotes(userID)
 
 
 		queryRes2 = db.executeQuery(sql)
@@ -128,7 +136,7 @@ class user(HttpServlet):
 
 		w = response.getWriter()
 
-		lastUsedHeroSQL = "SELECT * FROM shso.equips WHERE UserID = " + userID
+		lastUsedHeroSQL = "SELECT * FROM shso.equips WHERE UserID = " + escapeQuotes(userID)
 		# lastUsedHeroSQL = "SELECT hero FROM shso.equips WHERE userid = " + userID
 		lastUsedQueryRes = db.executeQuery(lastUsedHeroSQL)
 		last_used_hero = 'iron_man'
