@@ -6,6 +6,7 @@ import datetime
 
 def init():
 	global jdbconnection 
+	global db
 	global cmdMap
 	global srvVer
 	global validCliVer
