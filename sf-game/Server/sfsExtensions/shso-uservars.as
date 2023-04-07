@@ -213,7 +213,7 @@ function handleUserVars(params, user, room)
 			//_server.sendResponse(res, -1, null, [user], "str")
 
 			// now send playerVars msg for each active player to all users.  (maybe needs to be done at login, not here).
-			trace("SfUserID=" + tempRow.getItem("SfUserID").toString());
+			// trace("SfUserID=" + tempRow.getItem("SfUserID").toString());
 			// var pvUser = _server.getUserById(parseInt(tempRow.getItem("SfUserID")));
 			var ResNsql = "SELECT * FROM shso.user WHERE id = ?"
 			var prePareRrn = jdbconnection.prepareStatement(ResNsql)
