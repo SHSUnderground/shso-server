@@ -33,7 +33,7 @@
 
 
 var dbManager
-
+var jdbconnection
 
 /* 
 * Initializion point:
@@ -52,6 +52,7 @@ function init()
 	trace("shso-escrow init() called!")
 		
 	dbManager = _server.getDatabaseManager()
+	jdbconnection = dbManager.getConnection()
 
 	// Create a reference to the Java package
 		// This help us building new objects from the nanoxml package.
@@ -77,32 +78,45 @@ function destroy()
 	trace("Bye bye!")
 		// Release the reference to the dbase manager
 		delete dbase
+		jdbconnection.close()
 }
 
 
 function storeMissionPlayers(userID, missionID) {
 	trace("storeMissionPlayers was called.")
 	if (userID && missionID) {
-		var sql = "INSERT INTO active_missions VALUES(" + _server.escapeQuotes(userID) + ", '" + _server.escapeQuotes(missionID) + "') ON DUPLICATE KEY UPDATE MissionID = '" + _server.escapeQuotes(missionID) + "';"
-		var success = dbManager.executeCommand(sql);
+		var sqlCommand = "INSERT INTO active_missions VALUES(?, ?) ON DUPLICATE KEY UPDATE MissionID = ?"
+		var prePareR = jdbconnection.prepareStatement(sqlCommand)
+		prePareR.setInit(1,userID)
+		prePareR.setString(2,missionID)
+		prePareR.setString(3,missionID)
+		
+		var success = prePareR.executeUpdate()
 				
-		if (success)
+		if (success != 0)
 			trace("Mission record inserted!")
 		else
 			trace("Ouch, mission record insertion failed")
+		
+		prePareR.close()
 	}
 }
 
 
 function removeMissionPlayers(userID) {
-	var sql = "DELETE FROM active_missions WHERE UserID = (SELECT ShsoUserID FROM active_players WHERE SfUserID =" + _server.escapeQuotes(userID.toString()) + ");"
+	var removeSqlCommand = "DELETE FROM active_missions WHERE UserID = (SELECT ShsoUserID FROM active_players WHERE SfUserID=?)"
 	// trace("Remove from missions sql: " + sql)
-	var success = dbManager.executeCommand(sql);
+	var prePareRqremove = jdbconnection.prepareStatement(removeSqlCommand)
+	prePareRqremove.setInit(1,userID)
+	
+	var success = prePareRqremove.executeUpdate()
 				
-		if (success)
+	if (success != 0)
 		trace("Record deleted!")
 	else
 		trace("Ouch, record deletion failed")
+	
+	prePareRqremove.close()
 }
 
 function handleGetGameRoom(userID, missionID)
@@ -572,16 +586,19 @@ function handleInternalEvent(evt)
 
 	
 	//Remove Player from active_players
-	sql = "DELETE FROM active_players WHERE SfUserID=" + _server.escapeQuotes(uid.toString());
+	var removePlayerSql = "DELETE FROM active_players WHERE SfUserID=?"
+	var prePareRemove = jdbconnection.prepareStatement(removePlayerSql)
+	prePareRemove.setInit(1,uid)
 	trace("sql= " + sql);
-	var success = dbManager.executeCommand(sql);
+	
+	var success = prePareRemove.executeUpdate();
 				
-		if (success)
+		if (success != 0)
 			trace("Record deleted!")
 		else
 			trace("Ouch, record deletion failed")
 	
-	
+	prePareRemov.close()
 
 	return;
    }
@@ -680,14 +697,24 @@ function handleHeroCreate(params, user, room)
 	var users = curRoom.getAllUsers()
 
 	///////// write active player info to active_players table in database.  ///////
-	var sql = "INSERT INTO active_players (SfUserID, ShsoUserID, SfRoomID, Hero, BlobText) VALUES(" + _server.escapeQuotes(uid.toString()) + "," + _server.escapeQuotes(shsoID.toString()) + "," + _server.escapeQuotes(curRoom.getId().toString()) + ",'" + _server.escapeQuotes(hero) + "','" + _server.escapeQuotes(blob) + "') ON DUPLICATE KEY UPDATE Hero = '" + _server.escapeQuotes(hero) + "', BlobText = '" + _server.escapeQuotes(blob) + "'";
+	var insertSql = "INSERT INTO active_players (SfUserID, ShsoUserID, SfRoomID, Hero, BlobText) VALUES(?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE Hero = ? , BlobText = ?"
+	var prePareRin = jdbconnection.prepareStatement(insertSql)
+	prePareRin.setInit(1,uid)
+	prePareRin.setInit(2,shsoID)
+	prePareRin.setInit(3,curRoom.getId())
+	prePareRin.setString(4,hero)
+	prePareRin.setString(5,blob)
+	prePareRin.setString(6,hero)
+	prePareRin.setString(7,blob)
+
 	trace("sql= " + sql);
-	var success = dbManager.executeCommand(sql);
-				
-		if (success)
+	var success = prePareRin.executeUpdate()
+
+		if (success != 0)
 		trace("Record inserted!")
 	else
 		trace("Ouch, record insertion failed")
+	prePareRin.close()
 	/////////////////////////////////////////////////////////////////////
 
 
@@ -701,52 +728,58 @@ function handleHeroCreate(params, user, room)
 
 
 	///////// now query active_players table, send hero_create response for each active player in room to client.  ///////
-	sql = "SELECT * FROM active_players WHERE SfRoomID = " + _server.escapeQuotes(curRoom.getId().toString());
-	var queryRes = dbManager.executeQuery(sql)
-	if (queryRes != null)
+	var getallUserSql = "SELECT * FROM active_players WHERE SfRoomID = ?" 
+	var prePareRUser = jdbconnection.prepareStatement(getallUserSql)
+	prePareRUser.setInit(1,curRoom.getId())
+
+	var queryRes = prePareRUser.executeQuery()
+	if (queryRes.next() != null)
 	{
-		for (var i = 0; i < queryRes.size(); i++)
-		// var i =0;
-		// for(var tempRow in queryRes)
-		{
-			var tempRow = queryRes.get(i)
 		
-			//trace("Record n." + i)
-			//trace("Name: " + tempRow.getItem("name"))
-			//trace("Location: " + tempRow.getItem("location"))
-			//trace("Email: " + tempRow.getItem("email"))
-			//trace("-------------------------------------------")
+		do
+		{
 
 			res = []		// The list of params	
 			res[0] = "hero_create"		// at index = 0, we store the command name
-			res[1] = tempRow.getItem("SfUserID")	// fromRTCId - CSP not sure what this is supposed to be, guessing that it's user ID
-			res[2] = tempRow.getItem("Hero")	// hero
-			res[3] = tempRow.getItem("BlobText")	// data
+			res[1] = queryRes.getInt("SfUserID")	// fromRTCId - CSP not sure what this is supposed to be, guessing that it's user ID
+			res[2] = queryRes.getString("Hero")	// hero
+			res[3] = queryRes.getString("BlobText")	// data
 
 			_server.sendResponse(res, -1, null, [user], "str")
 
 			// now send playerVars msg for each active player to all users.  (maybe needs to be done at login, not here).
 			//trace("SfUserID=" + tempRow.getItem("SfUserID").toString())
 			// var pvUser = _server.getUserById(parseInt(tempRow.getItem("SfUserID")))
-			var sql = "SELECT * FROM shso.user WHERE id = " + _server.escapeQuotes(tempRow.getItem("ShsoUserID").toString());
-			var queryResName = dbManager.executeQuery(sql);
-			var player_name = queryResName.get(0).getItem("Username").toString();
+			var ResNsql = "SELECT * FROM shso.user WHERE id = ?"
+			var prePareRrn = jdbconnection.prepareStatement(ResNsql)
+			prePareRrn.setInit(1,queryRes.getInt("ShsoUserID"))
+			
+			var queryResName = prePareRrn.executeQuery();
+
+			var player_name = queryResName.next().getString("Username");
 
 			res = []
 			res[0] = "playerVars"
-			res[1] = tempRow.getItem("SfUserID").toString() + "|" + tempRow.getItem("ShsoUserID").toString() + "|" + player_name + "|true|1|1"
+			res[1] = queryRes.getInt("SfUserID").toString() + "|" + queryRes.getInt("ShsoUserID").toString() + "|" + player_name + "|true|1|1"
 			//trace("Res[1]: " + res[1]);
 			//_server.sendResponse(res, -1, null, [user], "str")
 			_server.sendResponse(res, -1, null, users, "str")
 			// i++;
+			
+			queryResName.close()
 
+			prePareRrn.close()
 
-		}
+		} while (queryRes.next())
 	}
 	else
 		trace("DB Query failed")
 	/////////////////////////////////////////////////////////////////////
+	
+	queryRes.close()
 
+	
+	prePareRUser.close()
 
 }
 

@@ -99,7 +99,7 @@ def handleInternalEvent(evt):
 
 		result = prePareR.executeQuery()
 
-		if (result.next() != False):
+		if (result.next()):
 				username = result.getString("Username")
 				playerID = result.getInt("ID")
 				paid = result.getInt("Paid")

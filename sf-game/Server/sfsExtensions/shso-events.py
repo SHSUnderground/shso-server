@@ -47,11 +47,15 @@ def handleInternalEvent(evt):
 		response["name"] = "crabfu"
 		response["id"] = "1"; 
 		response["playerId"] = "EmpIridWolf"
-		session_token_sql = "select * from shso.tokens where UserID =" + (playerID)
-		session_token_res = db.executeQuery(session_token_sql)
+		
+		session_token_sql = "select * from shso.tokens where UserID = ?"
+		prePareR = jdbconnection.prepareStatement(session_token_sql)
+		prePareR.setInt(1,playerID)
+		session_token_res = prePareR.executeQuery(session_token_sql)
+
 		session_token = None
-		if session_token_res:
-			session_token = session_token_res[0].getItem("token")
+		if session_token_res.next() != False:
+			session_token = session_token_res.getString("token")
 		response["sessionToken"] = session_token
 		_server.trace("Calling sendResponse()!")
 		_server.sendResponse(response, -1, None, chan)
@@ -65,6 +69,11 @@ def handleInternalEvent(evt):
 		response["_cmd"] = "notification_ready"
 		_server.sendResponse(response, -1, None, [user])
 
+	session_token_res.close()
+
+	prePareR.close()
+
+	jdbconnection.close()
 
 def handlePing(params, who, roomId):
 	

@@ -6,12 +6,14 @@ ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 
 def init():
-	global db 
+	global db
+	global jdbconnection 
 	global cmdMap
 	
 	cmdMap = {"getSeat": handleGetSeat, "closeRoom":handleCloseRoom }
 	
 	db = _server.getDatabaseManager()
+	jdbconnection = db.getConnection()
 
 
 def destroy():
@@ -67,27 +69,42 @@ def getNodeData(inStr, nodeStr):
 def getPlayerName(shsoUserId):
 	error = ""
 	username = None
-	sql = "SELECT Username FROM user WHERE ID = " + (shsoUserId)
-	queryRes = db.executeQuery(sql)
-	if (queryRes == None) or (queryRes.size() == 0):
+	getUsernameSql = "SELECT Username FROM user WHERE ID = ?"
+
+	prePareR = jdbconnection.prepareStatement(getUsernameSql)
+	prePareR.setInit(1,shsoUserId)
+
+	queryRes = prePareR.executeQuery()
+	if (queryRes.next()):
 		error = "query failed"
 	if error == "":
-		for row in queryRes:
-			username = row.getItem("Username")
-			break
+		
+		username = queryRes.getString("Username")
+	
+	queryRes.close()
+	prePareR.close()
+	jdbconnection.close()
+
 	return username
 
 def getSfUserId(shsoUserId):
 	error = ""
 	sfUserID = None
-	sql = "SELECT SfUserID FROM active_players WHERE ShsoUserID = " + (shsoUserId)
-	queryRes = db.executeQuery(sql)
-	if (queryRes == None) or (queryRes.size() == 0):
+	getIdSql = "SELECT SfUserID FROM active_players WHERE ShsoUserID = ?"
+	prePareR = jdbconnection.prepareStatement(getIdSql)
+	prePareR.setInit(1,shsoUserId)
+
+	queryRes = prePareR.executeQuery()
+	if (queryRes.next()):
 		error = "query failed"
 	if error == "":
-		for row in queryRes:
-			sfUserID = row.getItem("SfUserID")
-			break
+
+		sfUserID = queryRes.getString("SfUserID")
+
+	queryRes.close()
+	prePareR.close()
+	jdbconnection.close()
+	
 	return sfUserID
 
 def handleCloseRoom(params, who, roomId):
