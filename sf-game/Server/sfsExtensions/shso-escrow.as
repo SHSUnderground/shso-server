@@ -77,8 +77,8 @@ function destroy()
 {
 	trace("Bye bye!")
 		// Release the reference to the dbase manager
-		delete dbase
-		jdbconnection.close()
+	delete dbase
+	jdbconnection.close()
 }
 
 
@@ -733,7 +733,7 @@ function handleHeroCreate(params, user, room)
 	prePareRUser.setInit(1,curRoom.getId())
 
 	var queryRes = prePareRUser.executeQuery()
-	if (queryRes.next() != null)
+	if (queryRes.next())
 	{
 		
 		do

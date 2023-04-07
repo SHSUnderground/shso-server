@@ -33,7 +33,7 @@
 
 
 var dbManager
-
+var jdbconnection
 
 /* 
 * Initializion point:
@@ -52,6 +52,7 @@ function init()
 	trace("shso-uservars init() called!")
 		
 	dbManager = _server.getDatabaseManager()
+	jdbconnection = dbManager.getConnection()
 }
 
 
@@ -70,6 +71,7 @@ function destroy()
 	trace("Bye bye!")
         // Release the reference to the dbase manager
         delete dbase
+	jdbconnection.close()
 }
 
 
@@ -186,14 +188,16 @@ function handleUserVars(params, user, room)
 
 
 	///////// now query active_players table, send hero_create response for each active player in room to client.  ///////
-	var sql = "SELECT * FROM active_players WHERE SfRoomID = " + _server.escapeQuotes(curRoom.getId().toString());
-	var queryRes = dbManager.executeQuery(sql)
-	if (queryRes != null)
+	var getActivePlayerSql = "SELECT * FROM active_players WHERE SfRoomID =?"
+	var prePareR = jdbconnection.prepareStatement(getActivePlayerSql)
+	prePareR.setInit(1,curRoom.getId())
+
+	var queryRes = prePareR.executeQuery()
+	if (queryRes.next())
 	{
-		for (var i = 0; i < queryRes.size(); i++)
+		do
 		{
-			var tempRow = queryRes.get(i)
-		
+					
 			//trace("Record n." + i)
 			//trace("Name: " + tempRow.getItem("name"))
 			//trace("Location: " + tempRow.getItem("location"))
@@ -211,25 +215,36 @@ function handleUserVars(params, user, room)
 			// now send playerVars msg for each active player to all users.  (maybe needs to be done at login, not here).
 			trace("SfUserID=" + tempRow.getItem("SfUserID").toString());
 			// var pvUser = _server.getUserById(parseInt(tempRow.getItem("SfUserID")));
-			var sql = "SELECT * FROM shso.user WHERE id = " + _server.escapeQuotes(tempRow.getItem("ShsoUserID").toString());
-			var queryResName = dbManager.executeQuery(sql);
-			var player_name = queryResName.get(0).getItem("Username").toString();
+			var ResNsql = "SELECT * FROM shso.user WHERE id = ?"
+			var prePareRrn = jdbconnection.prepareStatement(ResNsql)
+			prePareRrn.setInit(1,queryRes.getInt("ShsoUserID"))
+			
+			var queryResName = prePareRrn.executeQuery();
 
-			res = [];
-			res[0] = "playerVars";
-			res[1] = tempRow.getItem("SfUserID").toString() + "|" + tempRow.getItem("ShsoUserID").toString() + "|" + player_name + "|true|1|1";
-			// trace("Res[1]: " + res[1]);
+			var player_name = queryResName.next().getString("Username");
+
+			res = []
+			res[0] = "playerVars"
+			res[1] = queryRes.getInt("SfUserID").toString() + "|" + queryRes.getInt("ShsoUserID").toString() + "|" + player_name + "|true|1|1"
+			//trace("Res[1]: " + res[1]);
 			//_server.sendResponse(res, -1, null, [user], "str")
-			_server.sendResponse(res, -1, null, users, "str");
+			_server.sendResponse(res, -1, null, users, "str")
+			// i++;
+			
+			queryResName.close()
+
+			prePareRrn.close()
 
 
-		}
+		} while (queryRes.next())
 	}
 	else
 		trace("DB Query failed")
 	/////////////////////////////////////////////////////////////////////
 
+	queryRes.close()
 
+	prePareR.close()
 }
 
 
