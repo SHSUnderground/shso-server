@@ -5,7 +5,7 @@ import time
 import datetime
 
 def init():
-	global db 
+	global jdbconnection 
 	global cmdMap
 	global srvVer
 	global validCliVer
@@ -15,6 +15,7 @@ def init():
 	cmdMap = {"ping": handlePing, "keepAlive": handleKeepAlive }
 	
 	db = _server.getDatabaseManager()
+	jdbconnection = db.getConnection()
 
 
 def destroy():
@@ -89,16 +90,19 @@ def handleInternalEvent(evt):
 		user = None
 		session_token = None
 		userIP = chan.socket().getInetAddress().getHostAddress()
-		queryRes = None
-		checkSQL = "SELECT * FROM user WHERE username = '" + escapeQuotes(nick) + "' AND Password = '" + escapeQuotes(passw) + "';"
-		UserCheckQueryResult = db.executeQuery(checkSQL)
-		if (UserCheckQueryResult) and (UserCheckQueryResult.size() > 0):
-				queryRes = UserCheckQueryResult
-				row = queryRes.get(0)
-				username = row.getItem("Username")
-				playerID = row.getItem("ID")
-				paid = row.getItem("Paid")
-				dbpass = row.getItem("Password")
+
+		getUserSQLCommand = "SELECT * FROM user WHERE username=? AND Password=?"
+		prePareR = jdbconnection.prepareStatement(getUserSQLCommand)
+		prePareR.setString(1,nick)
+		prePareR.setString(2,passw)
+
+		result = prePareR.executeQuery()
+
+		if (result.next() != False):
+				username = result.getString("Username")
+				playerID = result.getInt("ID")
+				paid = result.getInt("Paid")
+				dbpass = result.getString("Password")
 				# session_token = generate_token()
 				gentoken = "SELECT UUID() AS token;"
 				tokenQuery = db.executeQuery(gentoken)
@@ -108,6 +112,7 @@ def handleInternalEvent(evt):
 				# _server.trace('TOKEN GENERATED SUCCESSFULLY.')
 				sql = "INSERT INTO tokens VALUES(" + escapeQuotes(str(playerID)) + ", '" + escapeQuotes(session_token) + "') ON DUPLICATE KEY UPDATE token='" + escapeQuotes(session_token) + "'"
 				success = db.executeCommand(sql)
+
 				if not success:
 					error = "Record insertion failed."
 				else:
@@ -124,13 +129,28 @@ def handleInternalEvent(evt):
 					response["paid"] = paid
 					response["sessionToken"] = str(session_token)
 					
+
+					
 					# now write login date
 					ts = time.time()
 					timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 					ip = user.getIpAddress()
 
-					sql = "UPDATE shso.user SET LastLogin = '" + escapeQuotes(timestamp) + "'  WHERE username = '" + escapeQuotes(nick) + "'";
-					success = db.executeCommand(sql)
+					updateUserLastLoginCommand = "UPDATE shso.user SET LastLogin=? WHERE username=?"
+					prePareRtimestamp = jdbconnection.prepareStatement(updateUserLastLoginCommand)
+					
+					prePareRtimestamp.setTimestamp(1,timestamp)
+					prePareRtimestamp.setString(2,nick)
+					
+					rowsAffected = prePareRtimestamp.executeUpdate()
+
+				
+				result.close()
+
+				prePareRtimestamp.close()
+				prePareR.close()
+				
+				jdbconnection.close()
 
 		# elif valid == -1:
 		# 	response["_cmd"] = "logKO"
@@ -153,6 +173,9 @@ def handleInternalEvent(evt):
 		else: 
 			response["_cmd"] = "logKO"
 		_server.sendResponse(response, -1, None, [user])
+
+		
+	
 
 
 
