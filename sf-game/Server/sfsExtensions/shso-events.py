@@ -1,12 +1,14 @@
 # shso events
 #
 def init():
-	global db 
+	global db
+	global jdbconnection 
 	global cmdMap
 	
 	cmdMap = {"ping": handlePing, "keepAlive": handleKeepAlive }
 	
 	#db = _server.getDatabaseManager()
+	jdbconnection = db.getConnection()
 
 
 def destroy():
@@ -54,7 +56,7 @@ def handleInternalEvent(evt):
 		session_token_res = prePareR.executeQuery(session_token_sql)
 
 		session_token = None
-		if session_token_res.next() != False:
+		if session_token_res.next():
 			session_token = session_token_res.getString("token")
 		response["sessionToken"] = session_token
 		_server.trace("Calling sendResponse()!")
