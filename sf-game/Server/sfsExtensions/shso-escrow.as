@@ -589,7 +589,7 @@ function handleInternalEvent(evt)
 	var removePlayerSql = "DELETE FROM active_players WHERE SfUserID=?"
 	var prePareRemove = jdbconnection.prepareStatement(removePlayerSql)
 	prePareRemove.setInit(1,uid)
-	trace("sql= " + sql);
+	trace("sql= " + removePlayerSql);
 	
 	var success = prePareRemove.executeUpdate();
 				
@@ -707,7 +707,7 @@ function handleHeroCreate(params, user, room)
 	prePareRin.setString(6,hero)
 	prePareRin.setString(7,blob)
 
-	trace("sql= " + sql);
+	trace("sql= " + insertSql);
 	var success = prePareRin.executeUpdate()
 
 		if (success != 0)
