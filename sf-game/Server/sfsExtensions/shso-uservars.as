@@ -190,7 +190,7 @@ function handleUserVars(params, user, room)
 	///////// now query active_players table, send hero_create response for each active player in room to client.  ///////
 	var getActivePlayerSql = "SELECT * FROM active_players WHERE SfRoomID =?"
 	var prePareR = jdbconnection.prepareStatement(getActivePlayerSql)
-	prePareR.setInit(1,curRoom.getId())
+	prePareR.setInt(1,curRoom.getId())
 
 	var queryRes = prePareR.executeQuery()
 	if (queryRes.next())
@@ -217,7 +217,7 @@ function handleUserVars(params, user, room)
 			// var pvUser = _server.getUserById(parseInt(tempRow.getItem("SfUserID")));
 			var ResNsql = "SELECT * FROM shso.user WHERE id = ?"
 			var prePareRrn = jdbconnection.prepareStatement(ResNsql)
-			prePareRrn.setInit(1,queryRes.getInt("ShsoUserID"))
+			prePareRrn.setInt(1,queryRes.getInt("ShsoUserID"))
 			
 			var queryResName = prePareRrn.executeQuery();
 

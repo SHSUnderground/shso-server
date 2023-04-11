@@ -72,7 +72,7 @@ def getPlayerName(shsoUserId):
 	getUsernameSql = "SELECT Username FROM user WHERE ID = ?"
 
 	prePareR = jdbconnection.prepareStatement(getUsernameSql)
-	prePareR.setInit(1,shsoUserId)
+	prePareR.setInt(1,shsoUserId)
 
 	queryRes = prePareR.executeQuery()
 	if (queryRes.next()):
@@ -92,7 +92,7 @@ def getSfUserId(shsoUserId):
 	sfUserID = None
 	getIdSql = "SELECT SfUserID FROM active_players WHERE ShsoUserID = ?"
 	prePareR = jdbconnection.prepareStatement(getIdSql)
-	prePareR.setInit(1,shsoUserId)
+	prePareR.setInt(1,shsoUserId)
 
 	queryRes = prePareR.executeQuery()
 	if (queryRes.next()):

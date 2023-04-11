@@ -154,7 +154,7 @@ function handleSendRoomMsg(params, user, room)
 
 	var UserSQLCommand="SELECT Username FROM shso.user WHERE ID=(SELECT ShsoUserID FROM shso.active_players WHERE SfUserID=?)"
 	var prePareRuser = jdbconnection.prepareStatement(UserSQLCommand)
-	prePareRuser.setInit(1,sender_player_id)
+	prePareRuser.setInt(1,sender_player_id)
 	var resultUser = prePareRuser.executeQuery()
 
 
