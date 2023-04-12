@@ -56,7 +56,8 @@ class set_costume_info(HttpServlet):
 		#targetExtension = zone.getExtension("escrow");
 
 		# Get a reference to database manager
-		db = zone.dbManager;
+		db = zone.dbManager
+		jdbconnection = db.getConnection()
 
 		userID = None
 		session_token = None
@@ -73,22 +74,32 @@ class set_costume_info(HttpServlet):
 				hero_name = request.getParameter(name)
 
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
-			tokenQuery = db.executeQuery(getUserID)
+			getUserID = "SELECT * from tokens WHERE token= ?"
+			prepare = jdbconnection.prepareStatement(getUserID)
+			prepare.setString(1,session_token)
+			tokenQuery = prepare.executeQuery()
 			# userID = None
 			
 			
-			if tokenQuery.size() > 0:
-				userID = tokenQuery[0].getItem("userID") 
+			if tokenQuery.next():
+				userID = tokenQuery.getInt("userID")
+				playerID = userID
+ 
+			tokenQuery.close()
+			prepare.close()
 
 		# Update/Insert db record for this player
 		error = ""
-		sql = "INSERT INTO shso.equips (UserID, hero_name) values (" + userID + ", '" + hero_name + "') ON DUPLICATE KEY UPDATE hero_name = '" + hero_name + "'"
+		sql = "INSERT INTO shso.equips (UserID, hero_name) values (?,?) ON DUPLICATE KEY UPDATE hero_name = ?"
+		prePareR = jdbconnection.prepareStatement(sql)
+		prePareR.setInt(1,userID)
+		prePareR.setString(2,hero_name)
+		prePareR.setString(3,hero_name)
 
-		success = db.executeCommand(sql)
-		if (not success):
+		success = prePareR.executeUpdate()
+		if (success == 0 ):
 			error = "db query failed"
-									
+		prePareR.close()						
 		w = response.getWriter()
 
 		w.println("<response>")
@@ -102,6 +113,6 @@ class set_costume_info(HttpServlet):
 
 		w.close()
 
-	
+		jdbconnection.close()
 		#pass
 		

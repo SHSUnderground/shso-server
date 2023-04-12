@@ -55,7 +55,8 @@ class set_title_info(HttpServlet):
 		#targetExtension = zone.getExtension("escrow");
 
 		# Get a reference to database manager
-		db = zone.dbManager;
+		db = zone.dbManager
+		jdbconnection = db.getConnection()
 
 		userID = None
 		session_token = None
@@ -73,13 +74,19 @@ class set_title_info(HttpServlet):
 				medallion_id = request.getParameter(name)
 
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
-			tokenQuery = db.executeQuery(getUserID)
+			getUserID = "SELECT * from tokens WHERE token= ?"
+			prepare = jdbconnection.prepareStatement(getUserID)
+			prepare.setString(1,session_token)
+			tokenQuery = prepare.executeQuery()
 			# userID = None
 			
 			
-			if tokenQuery.size() > 0:
-				userID = tokenQuery[0].getItem("userID")
+			if tokenQuery.next():
+				userID = tokenQuery.getInt("userID")
+				playerID = userID
+ 
+			tokenQuery.close()
+			prepare.close()
 
 		hero_name = 'iron_man'
 		title_id = '-1'
@@ -87,11 +94,20 @@ class set_title_info(HttpServlet):
 
 		# Update/Insert db record for this player
 		error = ""
-		sql = "INSERT INTO shso.equips (UserID, title_id, medallion_id) values (" + userID + ", " + title_id + ", " + medallion_id + ") ON DUPLICATE KEY UPDATE title_id = " + title_id + ", medallion_id = " + medallion_id
+		sql = "INSERT INTO shso.equips (UserID, title_id, medallion_id) values (?,?,?) ON DUPLICATE KEY UPDATE title_id = ? , medallion_id = ? "
+		prePareR = jdbconnection.prepareStatement(sql)
+		prePareR.setInt(1,userID)
+		prePareR.setInt(2,title_id)
+		prePareR.setInt(3,medallion_id)
+		prePareR.setInt(4,title_id)
+		prePareR.setInt(5,medallion_id)
 
-		success = db.executeCommand(sql)
-		if (not success):
+
+		success = prePareR.executeUpdate()
+		if (success == 0):
 			error = "db query failed"
+		
+		prePareR.close()
 									
 		w = response.getWriter()
 
@@ -105,7 +121,7 @@ class set_title_info(HttpServlet):
 		w.println("</response>")
 
 		w.close()
-
+		jdbconnection.close()
 	
 		#pass
 		

@@ -51,8 +51,8 @@ class purchase(HttpServlet):
 		zone = ex.getZone('shs.all')
 
 		# Get a reference to database manager
-		db = zone.dbManager;
-		jdbconnection.close()
+		db = zone.dbManager
+		jdbconnection = db.getConnection()
 
 		# write debug info to log
 		#sql = "INSERT INTO shso.log (Info) VALUES('entering friendsremove.py');"

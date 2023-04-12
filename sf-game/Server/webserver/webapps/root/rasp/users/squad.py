@@ -46,7 +46,8 @@ class squad(HttpServlet):
 		zone = ex.getZone('shs.all')
 
 		# Get a reference to database manager
-		db = zone.dbManager;
+		db = zone.dbManager
+		jdbconnection = db.getConnection()
 
 		#userID = "3870526"   # this line for doGet testing only !!!!!!!!!!!!!!!
 		for name in request.getParameterNames():
@@ -59,14 +60,19 @@ class squad(HttpServlet):
 	
 		
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
-			tokenQuery = db.executeQuery(getUserID)
+			getUserID = "SELECT * from tokens WHERE token= ?"
+			prepare = jdbconnection.prepareStatement(getUserID)
+			prepare.setString(1,session_token)
+			tokenQuery = prepare.executeQuery()
 			# userID = None
 			
 			
-			if tokenQuery.size() > 0:
-				userID = tokenQuery[0].getItem("userID")
-			# userID = 
+			if tokenQuery.next():
+				userID = tokenQuery.getInt("userID")
+				playerID = userID
+ 
+			tokenQuery.close()
+			prepare.close() 
 	
 		# fileList = ["POST Request Recieved"]
         # outfile = open("sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
@@ -216,6 +222,6 @@ class squad(HttpServlet):
 		#w.println(self.closeHtml)
 		w.close()
 
-	
+		jdbconnection.close()
 		#pass
 		
