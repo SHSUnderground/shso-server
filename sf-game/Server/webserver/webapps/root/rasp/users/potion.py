@@ -50,8 +50,8 @@ class potion(HttpServlet):
 		zone = ex.getZone('shs.all')
 
 		# Get a reference to database manager
-		db = zone.dbManager;
-
+		db = zone.dbManager
+		jdbconnection = db.getConnection()
 
 		# write debug info to log
 		#sql = "INSERT INTO shso.log (Info) VALUES('entering friendsremove.py');"
@@ -86,14 +86,18 @@ class potion(HttpServlet):
 		#target = 3900009  # temp for testing	
 							
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
-			tokenQuery = db.executeQuery(getUserID)
+			getUserID = "SELECT * from tokens WHERE token= ?"
+			prepare = jdbconnection.prepareStatement(getUserID)
+			prepare.setString(1,session_token)
+			tokenQuery = prepare.executeQuery()
 			# userID = None
 			
 			
-			if tokenQuery.size() > 0:
-				userID = tokenQuery[0].getItem("userID")
+			if tokenQuery.next():
+				userID = tokenQuery.getInt("userID")
 
+			tokenQuery.close()
+			prepare.close()
 		# get the player ID, which is the immediate parent dir name
 		playerID = userID
 		potion_id = str(ownable_type_id)
@@ -114,41 +118,60 @@ class potion(HttpServlet):
 		error = ""
 		shard_price = 999999
 		category = " "
-		sql = "SELECT name FROM shso.catalog WHERE ownable_type_id = " + escapeQuotes(str(ownable_type_id));
-		queryRes = db.executeQuery(sql)
+		sql = "SELECT name FROM shso.catalog WHERE ownable_type_id = ?"
+		prePareR = jdbconnection.prepareStatement(sql)
+		prePareR.setInt(1,ownable_type_id)
+		queryRes = prePareR.executeQuery()
 		responseBody = ""
-		if (queryRes == None) or (queryRes.size() == 0):
-			error = "db query failed"
+		if (queryRes.next()):
+			potion_name = queryRes.getString("name")
+			
 		else:
-			for row in queryRes:
-				potion_name = row.getItem("name")
+			error = "db query failed"
+		
+		queryRes.close()
+		prePareR.close()
+			
 
 
 		### CHECK IF PLAYER HAS ENOUGH FUNDS TO COMPLETE THE PURCHASE
 		error = ""
 		fractals = -1
 		quantity = 0
-		sql = "SELECT quantity FROM shso.inventory WHERE UserID = " + escapeQuotes(str(playerID)) + " AND type = " + escapeQuotes(str(ownable_type_id)) 
-		queryRes = db.executeQuery(sql)
-		if (queryRes == None) or (queryRes.size() == 0):
-			error = "db query failed"
+		sql = "SELECT quantity FROM shso.inventory WHERE UserID = ? AND type = ?" 
+		prePareR = jdbconnection.prepareStatement(sql)
+		prePareR.setInt(1,playerID)
+		prePareR.setInt(2,ownable_type_id)
+		queryRes = prePareR.executeQuery()
+
+		if (queryRes.next()):
+			quantity = queryRes.getInt("quantity")
 		else:
-			for row in queryRes:
-				quantity = int(row.getItem("quantity"))
+			error = "db query failed"
+		
+		queryRes.close()
+		prePareR.close()
 		if (quantity > 0):
 			# insert purchased hero into heroes table
 			error = ""
 			usersStr = ""
 
-			sql = "update shso.inventory set quantity=quantity - 1 WHERE UserID = " + playerID + " AND type = " + potion_id
+			sql = "update shso.inventory set quantity=quantity ? 1 WHERE UserID = ? AND type = ?"
+			prePareR = jdbconnection.prepareStatement(sql)
+			
 			if (str(playerID) == '53'):
-				sql = "update shso.inventory set quantity=quantity + 1 WHERE UserID = " + playerID + " AND type = " + potion_id
-			success = db.executeCommand(sql)
-			if (success):
+				prePareR.setString(1,"+")
+			else:
+				prePareR.setString(1,"-")
+			
+			prePareR.setInt(2,playerID)
+			prePareR.setInt(3,potion_id)
+			success = prePareR.executeUpdate()
+			if (success != 0):
 				error = "no error"
 			else:
 				error = "db command failed"
-
+			prePareR.close()
 			responseStatus = "200"
 			responseBody += '\n<player_id>' + str(user) + '</player_id>'
 			responseBody += '\n<_cmd>notification</_cmd>'
@@ -159,15 +182,21 @@ class potion(HttpServlet):
 				'#POTION_NAME_1000XPSHIELD', '#POTION_NAME_298424', 
 				'#POTION_NAME_5000XPSHIELD', '#POTION_NAME_298425'
 				]:
-				XPsql = ''
+				XPsql = "UPDATE shso.heroes SET Xp = Xp + ? WHERE UserID = ? AND name = ?"
+				prepareXP = jdbconnection.prepareStatement()
+				
 				if potion_name in ['#POTION_NAME_1000XPSHIELD', '#POTION_NAME_298424']:
-					xp = '1000'
-					XPsql = "UPDATE shso.heroes SET Xp = Xp + " + xp + " WHERE UserID = " + str(playerID) + " AND name = '" + hero_name + "'"
+					xp = 1000
+					prepareXP.setInt(1,xp)
 				elif potion_name in ['#POTION_NAME_5000XPSHIELD', '#POTION_NAME_298425']:
-					xp = '5000'
-					XPsql = "UPDATE shso.heroes SET Xp = Xp + " + xp + " WHERE UserID = " + str(playerID) + " AND name = '" + hero_name + "'"
-				success = db.executeCommand(XPsql)
-				if (success):
+					xp = 5000
+					prepareXP.setInt(1,xp)
+				
+				prepareXP.setInt(2,playerID)
+				prepareXP.setString(3,hero_name)
+				success = prepareXP.executeUpdate
+
+				if (success != 0):
 					error = "no error"
 				else:
 					error = "db command failed"
@@ -211,6 +240,7 @@ class potion(HttpServlet):
 
 
 		w.close()
+		jdbconnection.close()
 	
 		#pass
 		

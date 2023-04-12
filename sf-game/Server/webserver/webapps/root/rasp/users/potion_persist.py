@@ -54,7 +54,7 @@ class potion_persist(HttpServlet):
 
 		# Get a reference to database manager
 		db = zone.dbManager;
-
+		jdbconnection = db.getConnection()
 
 		# write debug info to log
 		#sql = "INSERT INTO shso.log (Info) VALUES('entering friendsremove.py');"
@@ -102,24 +102,31 @@ class potion_persist(HttpServlet):
 				if name == "shsoid":   # AS_SESSION_KEY
 					shsoID = int(request.getParameter(name))
 
-			sql = "select ownable_type_id, SfUserId, IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>"+escapeQuotes(str(potionDuration))+",'T','F') FROM active_players, active_potion_effects WHERE ShsoUserId="+escapeQuotes(str(shsoID))+";"
-			queryRes = db.executeQuery(sql)
-			if ( queryRes == None) or (queryRes.size() == 0):
-				pass
-			else:
-				#sfsID =  int(queryRes[0].getItem("SfUserID"));
-				for row in queryRes:
-					sfsID = int(row.getItem("SfUserID"))
+			sql = "select ownable_type_id, SfUserId, IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)> ?,'T','F') FROM active_players, active_potion_effects WHERE ShsoUserId=?"
+			prepare = jdbconnection.prepareStatement(sql)
+			prepare.setInt(1,potionDuration)
+			prepare.setInt(2,shsoID)
+			queryRes = prepare.executeQuery()
+			if (queryRes.next()):
+				queryRes.beforeFirst()
+				while queryRes.next():
+					sfsID = queryRes.getInt("SfUserID")
 					if sfsID < 0 :
 						pass
 					else:
-						ownableID = int(row.getItem("ownable_type_id"))
-						expiredCheck = str(row.getItem("IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>60,'T','F')"))
+						ownableID = queryRes.getInt("ownable_type_id")
+						expiredCheck = queryRes.getString("IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>60,'T','F')")
 						if expiredCheck == "T":
 							#Potion has expired!!!
 							expiredPotions = expiredPotions +str(ownableID)+","+str(sfsID) + "|"
 							sql = "DELETE FROM active_potion_effects WHERE userid=" + escapeQuotes(str(playerID))
 							db.executeCommand(sql)
+			else:
+				pass
+
+			queryRes.close()				
+			prepare.close()
+			jdbconnection.close()
 		except Exception as e:
 			er = str(e)
 			_server.trace(er)
