@@ -44,8 +44,8 @@ class friendsadd(HttpServlet):
 		#targetExtension = zone.getExtension("escrow");
 
 		# Get a reference to database manager
-		db = zone.dbManager;
-
+		db = zone.dbManager
+		jdbconnection = db.getConnection()
 		# Get parameters
 		value = ""
 		pname = ""
@@ -57,13 +57,17 @@ class friendsadd(HttpServlet):
 		# Get potential friend's ID from name
 		error = ""
 		friendID = 0
-		sql = "SELECT user.ID FROM shso.user user WHERE user.Username = '" + value + "'"
-		queryRes = db.executeQuery(sql)
-		if (queryRes == None) or (queryRes.size() == 0):
-			error = "db query failed"			
-		if error == "":			
-			for row in queryRes:
-				friendID = row.getItem("ID")
+		sql = "SELECT user.ID FROM shso.user user WHERE user.Username = ?"
+		prepare = jdbconnection.prepareStatement(sql)
+		prepare.setString(1,value)
+		queryRes = prepare.executeQuery()
+
+		if (queryRes.next()):
+			
+			friendID = queryRes.getInt("ID")		
+		else:			
+			error = "db query failed"
+				
 				
 
 		# get the player ID, which is the immediate parent dir name
@@ -136,6 +140,8 @@ class friendsadd(HttpServlet):
 		
 		#w.println(self.closeHtml)
 		w.close()
+
+		jdbconnection.close()
 
 	
 		#pass

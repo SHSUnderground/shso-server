@@ -43,7 +43,8 @@ class friendsremove(HttpServlet):
 		zone = ex.getZone('shs.all')
 
 		# Get a reference to database manager
-		db = zone.dbManager;
+		db = zone.dbManager
+		jdbconnection = db.getConnection()
 
 
 		# write debug info to log
@@ -91,13 +92,19 @@ class friendsremove(HttpServlet):
 		# delete friend from friends table
 		error = ""
 		usersStr = ""
-		sql = "DELETE FROM shso.friends WHERE PlayerID = " + playerID + " AND  FriendID = " + str(target) +";"
+		sql = "DELETE FROM shso.friends WHERE PlayerID = ? AND  FriendID = ?"
+		prepare = jdbconnection.prepareStatement(sql)
+		prepare.setInt(1,playerID)
+		prepare.setInt(2,target)
 
-		success = db.executeCommand(sql)
-		if (success):
+		success = prepare.executeUpdate()
+		if (success != 0):
 			error = "no error"
 		else:
 			error = "db command failed"
+
+		prepare.close()
+		jdbconnection.close()
 
 		w = response.getWriter()
 
