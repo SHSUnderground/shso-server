@@ -71,6 +71,7 @@ function destroy()
 	trace("Bye bye!")
 		// Release the reference to the dbase manager
 	delete dbase
+	jdbconnection.close()
 }
 
 /*
@@ -185,7 +186,7 @@ function handleSendRoomMsg(params, user, room)
 	prePareRuser.close()
 	prePareRmessge.close()
 
-	jdbconnection.close()
+	
 
 }
 

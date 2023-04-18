@@ -13,6 +13,7 @@ def init():
 
 def destroy():
 	_server.trace( "Python extension dying" )
+	jdbconnection.close()
 
 
 def escapeQuotes(string):
@@ -75,7 +76,7 @@ def handleInternalEvent(evt):
 
 	prePareR.close()
 
-	jdbconnection.close()
+	
 
 def handlePing(params, who, roomId):
 	

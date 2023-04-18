@@ -21,6 +21,7 @@ def init():
 
 def destroy():
 	_server.trace( "Python extension dying" )
+	jdbconnection.close()
 
 
 def escapeQuotes(string):
@@ -136,7 +137,7 @@ def handleInternalEvent(evt):
 					from java.sql import Timestamp
 					from java.lang import System
 					ts = System.currentTimeMillis()
-					timestamp = timestamp(ts)
+					timestamp = Timestamp(ts)
 					ip = user.getIpAddress()
 
 					updateUserLastLoginCommand = "UPDATE shso.user SET LastLogin=? WHERE username=?"
@@ -153,7 +154,7 @@ def handleInternalEvent(evt):
 				prePareRtimestamp.close()
 				prePareR.close()
 				
-				jdbconnection.close()
+				
 
 		# elif valid == -1:
 		# 	response["_cmd"] = "logKO"

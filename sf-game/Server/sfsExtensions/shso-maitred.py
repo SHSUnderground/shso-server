@@ -18,6 +18,7 @@ def init():
 
 def destroy():
 	_server.trace( "Python extension dying" )
+	jdbconnection.close()
 
 
 def escapeQuotes(string):
@@ -83,7 +84,7 @@ def getPlayerName(shsoUserId):
 	
 	queryRes.close()
 	prePareR.close()
-	jdbconnection.close()
+	
 
 	return username
 
@@ -103,7 +104,6 @@ def getSfUserId(shsoUserId):
 
 	queryRes.close()
 	prePareR.close()
-	jdbconnection.close()
 	
 	return sfUserID
 
