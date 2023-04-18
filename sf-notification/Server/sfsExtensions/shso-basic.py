@@ -133,8 +133,10 @@ def handleInternalEvent(evt):
 
 					
 					# now write login date
-					ts = time.time()
-					timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+					from java.sql import Timestamp
+					from java.lang import System
+					ts = System.currentTimeMillis()
+					timestamp = timestamp(ts)
 					ip = user.getIpAddress()
 
 					updateUserLastLoginCommand = "UPDATE shso.user SET LastLogin=? WHERE username=?"
