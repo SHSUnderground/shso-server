@@ -90,7 +90,7 @@ def handleInternalEvent(evt):
 		session_token = None
 		userIP = chan.socket().getInetAddress().getHostAddress()
 		queryRes = None
-		checkSQL = "SELECT * FROM user WHERE username = '" + escapeQuotes(nick) + "' AND MD5(CONCAT(" + key + ", Password)) = '" + escapeQuotes(passw) + "';"
+		checkSQL = "SELECT * FROM user WHERE username = '" + escapeQuotes(nick) + "' AND MD5(CONCAT('" + key + "', Password)) = '" + escapeQuotes(passw) + "';"
 		UserCheckQueryResult = db.executeQuery(checkSQL)
 		if (UserCheckQueryResult) and (UserCheckQueryResult.size() > 0):
 				queryRes = UserCheckQueryResult
