@@ -32,8 +32,8 @@
 */
 
 
+var jdbconnection
 var dbManager
-
 
 /* 
 * Initializion point:
@@ -52,6 +52,7 @@ function init()
 	trace("shso-chat init() called!")
 		
 	dbManager = _server.getDatabaseManager()
+	jdbconnection = dbManager.getConnection()
 }
 
 
@@ -70,6 +71,7 @@ function destroy()
 	trace("Bye bye!")
 		// Release the reference to the dbase manager
 	delete dbase
+	jdbconnection.close()
 }
 
 /*
@@ -145,10 +147,30 @@ function handleSendRoomMsg(params, user, room)
 	res.message = message
 	res.sender_player_id = parseInt(sender_player_id)
 	_server.sendResponse(res, -1, null, users, "xml")
-	var sql = "insert into chat (zone, user, message) values ('" + _server.escapeQuotes(room_name) + "', (SELECT Username FROM shso.user where ID =(SELECT ShsoUserID FROM shso.active_players where SfUserID =" + sender_player_id + ")), (SELECT CONVERT(FROM_BASE64('" + message + "') using UTF8MB3)));"
-	var success = dbManager.executeCommand(sql);
 
-	if (success)
+	
+	var sqlCommand = "INSERT INTO chat (zone, user, message) VALUES (?, ?, ?)"
+	var prePareR = jdbconnection.prepareStatement(sqlCommand)
+	prePareR.setString(1,room_name)
+
+	var UserSQLCommand="SELECT Username FROM shso.user WHERE ID=(SELECT ShsoUserID FROM shso.active_players WHERE SfUserID=?)"
+	var prePareRuser = jdbconnection.prepareStatement(UserSQLCommand)
+	prePareRuser.setInt(1,sender_player_id)
+	var resultUser = prePareRuser.executeQuery()
+
+
+	prePareR.setString(2,resultUser.next().getString("Username"))
+
+	var dcodeMessageSQLCommand = "SELECT CONVERT(FROM_BASE64(?)) using UTF8MB3"
+	var prePareRmessge = jdbconnection.prepareStatement(dcodeMessageSQLCommand)
+	prePareRmessge.setString(1,message)
+	var resultDcodeMessage = prePareRmessge.executeQuery()
+
+	prePareR.setString(3,resultDcodeMessage.next())
+
+	var success = prePareR.executeUpdate()
+
+	if (success != 0)
 		trace("Record inserted!")
 	else
 		trace("Ouch, record insertion failed")
@@ -156,6 +178,15 @@ function handleSendRoomMsg(params, user, room)
 	// logMessage = "[" + room_name + "] " + sender_player_id + ": " + Base64.decode64(message);
 	// _server.writeFile("chat.txt", logMessage, True);
 	//_server.sendResponse(res, -1, null, [user], "xml")
+	
+	resultUser.close()
+	resultDcodeMessage.close()
+
+	prePareR.close()
+	prePareRuser.close()
+	prePareRmessge.close()
+
+	
 
 }
 

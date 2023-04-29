@@ -51,8 +51,8 @@ class purchase(HttpServlet):
 		zone = ex.getZone('shs.all')
 
 		# Get a reference to database manager
-		db = zone.dbManager;
-
+		db = zone.dbManager
+		jdbconnection = db.getConnection()
 
 		# write debug info to log
 		#sql = "INSERT INTO shso.log (Info) VALUES('entering friendsremove.py');"
@@ -81,14 +81,20 @@ class purchase(HttpServlet):
 							
 
 		# get the player ID, which is the immediate parent dir name
-		getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
-		tokenQuery = db.executeQuery(getUserID)
+		if session_token is not None:
+			getUserID = "SELECT * from tokens WHERE token= ?"
+			prepare = jdbconnection.prepareStatement(getUserID)
+			prepare.setString(1,session_token)
+			tokenQuery = prepare.executeQuery()
 			# userID = None
 			
 			
-		if tokenQuery.size() > 0:
-			user = tokenQuery[0].getItem("userID") 
-		playerID = user
+			if tokenQuery.next():
+				userID = tokenQuery.getInt("userID")
+				playerID = userID
+ 
+			tokenQuery.close()
+			prepare.close()
 
 		# write debug info to log
 		#sql = "INSERT INTO shso.log (Info) VALUES('target:" + str(target) + "');"
@@ -107,24 +113,31 @@ class purchase(HttpServlet):
 		error = ""
 		shard_price = 999999
 		category = " "
-		sql = "SELECT shard_price, category, price_multiplier FROM shso.catalog WHERE catalog_ownable_id = " + escapeQuotes(catalog_ownable_id);
-		queryRes = db.executeQuery(sql)
-		if (queryRes == None) or (queryRes.size() == 0):
-			error = "db query failed"
+		sql = "SELECT shard_price, category, price_multiplier FROM shso.catalog WHERE catalog_ownable_id = ?"
+		prePareR = jdbconnection.prepareStatement(sql)
+		prePareR.setInt(1,catalog_ownable_id)
+		queryRes = prePareR.executeQuery()
+		if (queryRes.next()):
+			
+			
+			shard_price = float(queryRes.getInt("shard_price"))
+			multiplier = queryRes.getFloat("price_multiplier")
+			shard_price *= multiplier
+			shard_price = int(round(shard_price))
+			category = queryRes.getString("category")
+			
 		else:
-			for row in queryRes:
-				shard_price = float(row.getItem("shard_price"))
-				multiplier = float(row.getItem("price_multiplier"))
-				shard_price *= multiplier
-				shard_price = int(round(shard_price))
-				category = row.getItem("category")
+			error = "db query failed"
+			
 
+		prePareR.close()
+		queryRes.close()
 
 		### CHECK IF PLAYER HAS ENOUGH FUNDS TO COMPLETE THE PURCHASE
 		error = ""
 		fractals = -1
 		responseStatus = ""
-		sql = "SELECT Fractals FROM shso.user WHERE ID = " + escapeQuotes(playerID);
+		sql = "SELECT Fractals FROM shso.user WHERE ID = " + str(playerID)
 		queryRes = db.executeQuery(sql)
 		if (queryRes == None) or (queryRes.size() == 0):
 			error = "db query failed"
@@ -137,9 +150,22 @@ class purchase(HttpServlet):
 			usersStr = ""
 			sql = ""
 			if category == "h":
-				sql = "INSERT INTO shso.heroes (UserID, Name) SELECT " + playerID + ", name FROM catalog WHERE catalog_ownable_id = " + catalog_ownable_id + ";"
+				sql = "INSERT INTO shso.heroes (UserID, Name) SELECT ?, name FROM catalog WHERE catalog_ownable_id = ?"
+				prepare = jdbconnection.prepareStatement(sql)
+				prepare.setInt(1,playerID)
+				prepare.setInt(2,catalog_ownable_id)
+
+				success = prepare.executeUpdate()
+				prepare.close()
+
 			elif category not in ["badge", "craft", "sidekick"]:
-				sql = "INSERT INTO shso.inventory (UserID, type, category, subscriber_only) SELECT " + playerID + ", ownable_type_id, category, subscriber_only FROM catalog WHERE catalog_ownable_id = " + catalog_ownable_id + " ON DUPLICATE KEY UPDATE shso.inventory.quantity=shso.inventory.quantity+1;"
+				sql = "INSERT INTO shso.inventory (UserID, type, category, subscriber_only) SELECT ?, ownable_type_id, category, subscriber_only FROM catalog WHERE catalog_ownable_id = ? ON DUPLICATE KEY UPDATE shso.inventory.quantity=shso.inventory.quantity+1;"
+				prepare = jdbconnection.prepareStatement(sql)
+				prepare.setInt(1,playerID)
+				prepare.setInt(2,catalog_ownable_id)
+
+				success = prepare.executeUpdate()
+				prepare.close()
 			else:
 				responseStatus = "400"
 				responseBody = "Sidekick, badge, and craft purchases are disabled at this time."
@@ -147,8 +173,9 @@ class purchase(HttpServlet):
 			# if category != "h":
 			# 	sql = "INSERT INTO shso.inventory (UserID, type, category, subscriber_only) SELECT " + playerID + ", ownable_type_id, category, subscriber_only FROM catalog WHERE catalog_ownable_id = " + catalog_ownable_id + " ON DUPLICATE KEY UPDATE quantity=quantity+1;"
 
-			success = db.executeCommand(sql)
-			if (success):
+			
+
+			if (success != 0):
 				error = "no error"
 			else:
 				error = "db command failed"
@@ -156,12 +183,19 @@ class purchase(HttpServlet):
 			# SUBTRACT COST FROM PLAYER FRACTALS IN DB 
 			error = ""
 			if responseStatus != "400":
-				sql = "UPDATE shso.user SET Fractals = " + str(fractals - shard_price) + "  WHERE ID = " + playerID
+				sql = "UPDATE shso.user SET Fractals = ?  WHERE ID = ?"
+				prePareR = jdbconnection.prepareStatement(sql)
+				
 				if (str(playerID) == '53'):
-					sql = "UPDATE shso.user SET Fractals = " + str(fractals + shard_price) + "  WHERE ID = " + playerID
+					prePareR.setInt(1,fractals + shard_price)
+				else:
+					prePareR.setInt(1,fractals - shard_price)
+				
+				prePareR.setInt(2,playerID)
 
-				success = db.executeCommand(sql)
-				if (success):
+				success = prePareR.executeUpdate()
+				prePareR.close()
+				if (success != 0):
 					error = "no error"
 				else:
 					error = "db command failed"
@@ -191,7 +225,7 @@ class purchase(HttpServlet):
 		
 		w.close()
 
-		
+		jdbconnection.close()
 	
 		#pass
 		

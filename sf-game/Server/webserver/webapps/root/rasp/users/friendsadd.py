@@ -51,7 +51,7 @@ class friendsadd(HttpServlet):
 
 		# Get a reference to database manager
 		db = zone.dbManager;
-
+		jdbconnection = db.getConnection()
 		userID = None
 		session_token = None
 		pname = None
@@ -67,15 +67,19 @@ class friendsadd(HttpServlet):
 				pname = request.getParameter(name)
 
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
-			tokenQuery = db.executeQuery(getUserID)
+			getUserID = "SELECT * from tokens WHERE token= ?"
+			prepare = jdbconnection.prepareStatement(getUserID)
+			prepare.setString(1,session_token)
+			tokenQuery = prepare.executeQuery()
 			# userID = None
 			
 			
-			if tokenQuery.size() > 0:
-				userID = tokenQuery[0].getItem("userID")
+			if tokenQuery.next():
+				userID = tokenQuery.getInt("userID")
 
-			
+			tokenQuery.close()
+			prepare.close()
+			jdbconnection.close()	
 		# Get potential friend's ID from name
 		error = ""
 		friendID = 0

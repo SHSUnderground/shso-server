@@ -52,7 +52,7 @@ class potion_cancel(HttpServlet):
 
 		# Get a reference to database manager
 		db = zone.dbManager;
-
+		jdbconnection = db.getConnection()
 
 		# write debug info to log
 		#sql = "INSERT INTO shso.log (Info) VALUES('entering friendsremove.py');"
@@ -87,14 +87,19 @@ class potion_cancel(HttpServlet):
 		#target = 3900009  # temp for testing	
 							
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
-			tokenQuery = db.executeQuery(getUserID)
+			getUserID = "SELECT * from tokens WHERE token= ?"
+			prepare = jdbconnection.prepareStatement(getUserID)
+			prepare.setString(1,session_token)
+			tokenQuery = prepare.executeQuery()
 			# userID = None
 			
 			
-			if tokenQuery.size() > 0:
-				userID = tokenQuery[0].getItem("userID")
+			if tokenQuery.next():
+				userID = tokenQuery.getInt("userID")
 
+			tokenQuery.close()
+			prepare.close()
+			jdbconnection.close()
 		# get the player ID, which is the immediate parent dir name
 		playerID = userID
 		potion_id = str(ownable_type_id)
@@ -115,9 +120,11 @@ class potion_cancel(HttpServlet):
 		error = ""
 		shard_price = 999999
 		category = " "
-		sql = "SELECT name FROM shso.catalog WHERE ownable_type_id = " + escapeQuotes(str(ownable_type_id));
-		queryRes = db.executeQuery(sql)
+		#sql = "SELECT name FROM shso.catalog WHERE ownable_type_id = ?" + escapeQuotes(str(ownable_type_id));
+		#queryRes = db.executeQuery(sql)
 		responseBody = ""
+
+		
 		# if (queryRes == None) or (queryRes.size() == 0):
 		# 	error = "db query failed"
 		# else:

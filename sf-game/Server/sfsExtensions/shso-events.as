@@ -34,7 +34,7 @@
  */
 
 
-
+var jdbconnection
 /*
  * Initializion point:
  *
@@ -48,6 +48,7 @@ function init() {
 	dbManager = _server.getDatabaseManager()
 	// Using trace will send data to the server console
 	trace("shsoevents init() called.")
+	jdbconnection = dbManager.getConnection()
 
 }
 
@@ -64,54 +65,75 @@ function init() {
  */
 function destroy() {
 	trace("Bye bye!")
+	jdbconnection.close()
 }
 
 
 function applyXPBonus(userID, xp) {
 	trace("applyXPBonus called")
-	var sql = "SELECT * FROM mission_bonus WHERE MissionID = (SELECT MissionID FROM shso.active_missions WHERE shso.active_missions.UserID = " + _server.escapeQuotes(userID) + ");"
-	var queryRes = dbManager.executeQuery(sql)
+	var sql = "SELECT xp_multiplier FROM mission_bonus WHERE MissionID = (SELECT MissionID FROM shso.active_missions WHERE shso.active_missions.UserID = ?)"
+	var prePareRuser = jdbconnection.prepareStatement(sql)
+	prePareRuser.setInt(1,userID)
+	var queryRes = prePareRuser.executeQuery()
+
 	var sql_global_multiplier = "SELECT * FROM mission_bonus WHERE MissionID = 'global_multiplier';"
 	var queryRes_global = dbManager.executeQuery(sql_global_multiplier)
 	var multiplier = 1.0
 	if (queryRes_global && queryRes_global.size() > 0) {
 		multiplier = parseFloat(queryRes_global.get(0).getItem("xp_multiplier"));
 	}
-	if (queryRes && queryRes.size() > 0) {
-		multiplier = parseFloat(queryRes.get(0).getItem("xp_multiplier")) * parseFloat(multiplier);
+	if (queryRes.next()) {
+		multiplier = parseFloat(queryRes.getFloat("xp_multiplier")) * parseFloat(multiplier);
 		//trace("XP Multiplier = " + multiplier.toString())
 	}
 	//trace("New XP Bonus = ")
 	//trace((parseInt(xp)*multiplier).toString())
+	queryRes.close()
+	prePareRuser.close()
 	return (parseInt(parseFloat(xp) * parseFloat(multiplier))).toString()
+
 }
 
 function applyFractalsBonus(userID, fractals) {
 
-	var sql = "SELECT * FROM mission_bonus WHERE MissionID = (SELECT MissionID FROM shso.active_missions WHERE shso.active_missions.UserID = " + _server.escapeQuotes(userID) + ");"
-	var queryRes = dbManager.executeQuery(sql)
+	var sql = "SELECT fractals_multiplier FROM mission_bonus WHERE MissionID = (SELECT MissionID FROM shso.active_missions WHERE shso.active_missions.UserID = ?)"
+	var prePareRuser = jdbconnection.prepareStatement(sql)
+	prePareRuser.setInt(1,userID)
+	var queryRes = prePareRuser.executeQuery()
+
+
 	var sql_global_multiplier = "SELECT * FROM mission_bonus WHERE MissionID = 'global_multiplier';"
 	var queryRes_global = dbManager.executeQuery(sql_global_multiplier)
 	var multiplier = 1.0
 	if (queryRes_global && queryRes_global.size() > 0) {
 		multiplier = parseFloat(queryRes_global.get(0).getItem("fractals_multiplier"));
 	}
-	if (queryRes && queryRes.size() > 0) {
+	if (queryRes.next()) {
 		// var tempRow = queryRes.get(0)
-		multiplier = parseFloat(queryRes.get(0).getItem("fractals_multiplier")) * parseFloat(multiplier);
+		multiplier = parseFloat(queryRes.getFloat("fractals_multiplier")) * parseFloat(multiplier);
 		//trace("Fractals Multiplier = " + multiplier.toString())
 	}
+	queryRes.close()
+	prePareRuser.close()
 	return (parseInt(parseFloat(fractals) * parseFloat(multiplier))).toString()
 }
 
 
 function getUserIdFromSFS(sfsID) {
 
-	var sql = "select * from active_players where SfUserID =" + _server.escapeQuotes(sfsID) + ";";
-	queryRes = dbManager.executeQuery(sql);
-	if (queryRes && queryRes.size() > 0) {
-		return queryRes.get(0).getItem("ShsoUserID");
+	var sql = "select ShsoUserID from active_players where SfUserID = ?"
+	var prePareRuser = jdbconnection.prepareStatement(sql)
+	prePareRuser.setInt(1,sfsID)
+	var queryRes = prePareRuser.executeQuery()
+
+	if (queryRes.next()) {
+		var shsoUserID = queryRes.getInt("ShsoUserID")
+		queryRes.close()
+		prePareRuser.close()
+
+		return shsoUserID
 	}
+	
 
 }
 
@@ -134,25 +156,35 @@ function handleRequest(cmd, params, user, fromRoom) {
 		//Check for BonusXP
 		//trace("CHECKING BONUS XP")
 		var xp_multiplier = 1
-		var localsql = "select IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>" + "60" + ",'T','F') FROM  active_potion_effects WHERE userid=" + _server.escapeQuotes(getUserIdFromSFS(user.getUserId()).toString()) + " and ownable_type_id = 298429"
-		var queryRes = dbManager.executeQuery(localsql);
-		if (queryRes && queryRes.size() > 0) {
+		var localsql = "select IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>" + "60" + ",'T','F') FROM  active_potion_effects WHERE userid= ? and ownable_type_id = 298429"
+		var prePareR = jdbconnection.prepareStatement(localsql)
+		prePareRuser.setInt(1,getUserIdFromSFS(user.getUserId()))
+
+		var queryRes = prePareRuser.executeQuery()
+		if (queryRes.next()) {
 			//XP Potion exists for that user
 			//trace("BONUS POTION MIGHT EXIST, CHECKING BONUS!")
 
-			var tempRow = queryRes.get(0)
+			var tempRow = queryRes
 			//dbxP = tempRow.getItem("Xp")
-			var xpExist = tempRow.getItem("IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>" + "60" + ",'T','F')")
+			var xpExist = tempRow.getString("IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>" + "60" + ",'T','F')")
+			trace(xpExist)
 
 			if (xpExist == 'F') {
 				//trace("XP BONUS EXIST!!!")
 				xp_multiplier = 1.25; //Temp Value?
 			} else {
 				trace("XP BONUS EXPIRED! DELETING FROM DB!!")
-				localsql = "delete from active_potion_effects where ownable_type_id = 298429 and userid = " + _server.escapeQuotes(getUserIdFromSFS(user.getUserId()).toString())
-				queryRes = dbManager.executeCommand(localsql)
+				localSql = "delete from active_potion_effects where ownable_type_id = 298429 and userid = ?"
+				var prePareR = jdbconnection.prepareStatement(localSql)
+				prePareR.setInt(1,getUserIdFromSFS(user.getUserId()))
+				querYres = prePareR.executeUpdate()
+
+				prePareR.close()
 			}
 		}
+		queryRes.close()
+		prePareRuser.close()
 
 		var xpAward = Math.floor(parseInt(params.xp) * xp_multiplier)
 		var coinsAward = params.coins
@@ -187,19 +219,36 @@ function handleRequest(cmd, params, user, fromRoom) {
 		var remaining = 0; //Fallback value
 
 		//Get Remaining Potions of that type and set value to remaining
-		var localsql = "SELECT quantity FROM shso.inventory WHERE UserID = " + _server.escapeQuotes(userID.toString()) + " AND type = " + _server.escapeQuotes(params.ownable_type_id.toString());
-		var queryRes = dbManager.executeQuery(localsql);
-		if (queryRes && queryRes.size() > 0) {
-			remaining = queryRes.get(0).getItem("quantity") - 1;
+		var localsql = "SELECT quantity FROM shso.inventory WHERE UserID = ? AND type = ?"
+		var prePareR = jdbconnection.prepareStatement(localsql)
+		prePareR.setInt(1,userID)
+		prePareR.setInt(2,params.ownable_type_id)
+
+
+		var queryRes = prePareR.executeQuery(localsql);
+		if (queryRes.next()) {
+			remaining = queryRes.getInt("quantity") - 1;
 		}
+		queryRes.close()
+		prePareR.close()
 
 		if (remaining + 1 > 0) {
 			//Apply value to DB
-			localsql = "update shso.inventory set quantity=quantity - 1 WHERE UserID = " + _server.escapeQuotes(userID.toString()) + " AND type = " + _server.escapeQuotes(params.ownable_type_id.toString());
+			localsql = "update shso.inventory set quantity=quantity ? 1 WHERE UserID = ? AND type = ?"
+			var prePareR = jdbconnection.prepareStatement(localsql)
+			
+			
 			if ((userID.toString()) == "53") {
-				localsql = "update shso.inventory set quantity=quantity + 1 WHERE UserID = " + _server.escapeQuotes(userID.toString()) + " AND type = " + _server.escapeQuotes(params.ownable_type_id.toString());
+				prePareR.setString(1,"+")
+			} else {
+				prePareR.setString(1,"-")
 			}
-			var success = dbManager.executeCommand(localsql);
+			prePareR.setInt(2,userID)
+			prePareR.setInt(3,params.ownable_type_id)
+			var success = prePareR.executeUpdate();
+			
+			queryRes.close()
+			prePareR.close()
 
 			//AUTHORIZE POTION
 			response._cmd = "notification";
@@ -260,16 +309,37 @@ function handleRequest(cmd, params, user, fromRoom) {
 			//Add to active_potion_effects
 			var speedBasedPotions = ["298429", "298427"]
 			if (speedBasedPotions.indexOf(ownID.toString()) >= 0) {
-				var localsql = "select * FROM  active_potion_effects WHERE userid=" + _server.escapeQuotes(userID.toString()) + " and ownable_type_id = " + _server.escapeQuotes(ownID.toString())
-				var queryRes = dbManager.executeQuery(localsql)
-				if (queryRes && queryRes.size() > 0) {
-					localsql = "DELETE FROM shso.active_potion_effects WHERE userid=" + _server.escapeQuotes(userID.toString()) + " and ownable_type_id = " + _server.escapeQuotes(ownID.toString())
-					var success = dbManager.executeCommand(localsql);
+				var localsql = "select * FROM  active_potion_effects WHERE userid= ? and ownable_type_id = ?"
+				var prePareloc = jdbconnection.prepareStatement(localsql)
+				prePareloc.setInt(1,userID)
+				prePareloc.setInt(2,ownID)
+				var queryRes = prePareloc.executeQuery()
+
+				if (queryRes.next()) {
+					localsql = "DELETE FROM shso.active_potion_effects WHERE userid= ? and ownable_type_id = ?"
+					var preParelocal = jdbconnection.prepareStatement(localsql)
+					preParelocal.setInt(1,userID)
+					preParelocal.setInt(2,ownID)
+					var success = preParelocal.executeUpdate()
+					preParelocal.close()
 				}
-				localsql = "INSERT INTO shso.active_potion_effects(userid,request_id,hero_name,ownable_type_id) VALUES(" + _server.escapeQuotes(userID.toString()) + ",1,\"" + "hero" + "\"," + _server.escapeQuotes(ownID.toString()) + ")"
-				var success = dbManager.executeCommand(localsql);
+				localsql = "INSERT INTO shso.active_potion_effects(userid,request_id,hero_name,ownable_type_id) VALUES(?,?,?,?)"
+				var preParelocal = jdbconnection.prepareStatement(localsql)
+				preParelocal.setInt(1,userID)
+				preParelocal.setInt(2,1)
+				preParelocal.setString(3,"hero")
+				preParelocal.setInt(4,ownID)
+
+				var success = preParelocal.executeUpdate();
 				//trace("ADDED POTION TO DATABASE!");
+				
+				queryRes.close()
+				prePareloc.close()
+				preParelocal.close()
 			}
+			
+			
+			
 
 
 		} else {
@@ -277,9 +347,16 @@ function handleRequest(cmd, params, user, fromRoom) {
 
 			var speedBasedPotions = ["298429", "298427"]
 			if (speedBasedPotions.indexOf(params.ownable_type_id.toString()) >= 0) {
+
 				var localsql = "INSERT INTO shso.active_potion_effects(userid,request_id,hero_name,ownable_type_id) VALUES(" + _server.escapeQuotes(userID.toString()) + ",1,\"" + _server.escapeQuotes(params.hero.toString()) + "\"," + _server.escapeQuotes(ownID.toString()) + ")"
-				var sql = "DELETE FROM shso.inventory WHERE UserID = " + _server.escapeQuotes(userID.toString()) + " AND type = " + _server.escapeQuotes(params.ownable_type_id.toString()) + ";";
-				var success = dbManager.executeCommand(sql);
+				//I have the impression that localsql is not used useless variable ?
+				var sql = "DELETE FROM shso.inventory WHERE UserID = ? AND type = ?"
+
+				var prePare = jdbconnection.prepareStatement(sql)
+				prePare.setInt(1,userID)
+				prePare.setInt(2,params.ownable_type_id)
+				var success = prePare.executeUpdate();
+				prePare.close()
 				//trace("REMOVED POTION FROM DATABASE!");
 			}
 
@@ -314,8 +391,12 @@ function handleRequest(cmd, params, user, fromRoom) {
 
 		//Remove from active effects
 		var shsoID = getUserIdFromSFS(user.getUserId());
-		var sql = "DELETE FROM shso.active_potion_effects WHERE userid = " + _server.escapeQuotes(shsoID.toString()) + " and ownable_type_id = " + _server.escapeQuotes(params.ownable_type_id.toString());
-		var success = dbManager.executeCommand(sql);
+		var sql = "DELETE FROM shso.active_potion_effects WHERE userid = ? and ownable_type_id = ?"
+		var prePare = jdbconnection.prepareStatement(sql)
+		prePare.setInt(1,shsoID)
+		prePare.setInt(2,params.ownable_type_id)
+		var success = prePare.executeUpdate();
+		prePare.close()
 	}
 
 	if (cmd == "achievement_event") {
@@ -408,24 +489,33 @@ function handleRequest(cmd, params, user, fromRoom) {
 			//Check for BonusXP
 			//trace("CHECKING BONUS XP")
 			var xp_multiplier = 1
-			var localsql = "select IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>" + "60" + ",'T','F') FROM  active_potion_effects WHERE userid=" + _server.escapeQuotes(getUserIdFromSFS(user.getUserId()).toString()) + " and ownable_type_id = 298429"
-			var queryRes = dbManager.executeQuery(localsql);
-			if (queryRes && queryRes.size() > 0) {
+			var localsql = "select IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>" + "60" + ",'T','F') FROM  active_potion_effects WHERE userid= ? and ownable_type_id = 298429"
+			var prePare = jdbconnection.prepareStatement(sql)
+			prePare.setInt(1,getUserIdFromSFS(user.getUserId()))
+		
+			
+			var queryRes = prePare.executeQuery();
+			if (queryRes.next()) {
 				//XP Potion exists for that user
 				//trace("BONUS POTION MIGHT EXIST, CHECKING BONUS!")
 
-				var tempRow = queryRes.get(0)
+				var 
 				//dbxP = tempRow.getItem("Xp")
-				var xpExist = tempRow.getItem("IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>" + "60" + ",'T','F')")
+				var xpExist = queryRes.getString("IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>" + "60" + ",'T','F')")
 
 				if (xpExist == 'F') {
 					trace("XP BONUS EXIST!!!")
 					xp_multiplier = 1.25; //Temp Value?
 				} else {
 					trace("XP BONUS EXPIRED! DELETING FROM DB!!")
-					localsql = "delete from active_potion_effects where ownable_type_id = 298429 and userid = " + _server.escapeQuotes(getUserIdFromSFS(user.getUserId()).toString())
-					queryRes = dbManager.executeCommand(localsql)
+					localsql = "delete from active_potion_effects where ownable_type_id = 298429 and userid = ?"
+					var preParePo = jdbconnection.prepareStatement(localsql)
+					preParePo.setInt(1,getUserIdFromSFS(user.getUserId()))
+					queryResPo = preParePo.executeUpdate()
+
+					preParePo.close()
 				}
+				
 			}
 
 			response._cmd = "notification"
@@ -438,7 +528,10 @@ function handleRequest(cmd, params, user, fromRoom) {
 
 			//addXpToDb(response.xp_added, params.userID, params.hero)
 			addRewardsToDb(response.xp_added, response.fractals_added, params.userID, params.hero)
-		}
+			
+			queryRes.close()
+			prePare.close()
+		} 
 
 		if ((params.event_sub_type == "convert_star_fractal")) {
 			var response = {}
@@ -579,22 +672,39 @@ function handleRequest(cmd, params, user, fromRoom) {
 					toAward = toAward + UltraHeroes[randomID].toString()+"|hero";
 				}*/
 
-				localsql = "select * from mysterybox_loot_hero where heroname in (select name from allheroes where name not in (select name from UserHeroes where UserID=" + userID.toString() + "))"
-				queryRes = dbManager.executeQuery(localsql)
-				if (queryRes && queryRes.size() > 0) {
+				localsql = "select * from mysterybox_loot_hero where heroname in (select name from allheroes where name not in (select name from UserHeroes where UserID= ?))"
+				var prePare = jdbconnection.prepareStatement(localsql)
+				prePare.setInt(1,userID)
+				queryRes = prePare.executeQuery()
+				
+				if (queryRes.next()) {
 					//Can give out a hero
-					var randomID = Math.floor(Math.random() * queryRes.size())
-					var tempRow = queryRes.get(randomID)
-					var ownableID = tempRow.getItem("ownable_type_id").toString()
-					var heroName = tempRow.getItem("heroname").toString()
-					reward = reward + "{\"ownableTypeID\":" + ownableID + ",\"quantity\":1,\"category\":\"h\",\"rarity\":0}";
-					toAward = toAward + ownableID + ":" + heroName + "|hero";
-
+					queryRes.last()
+					var sizeRequest = queryRes.getRow()
+					trace("number hero avaible"+ sizeRequest)
+					var randomID = Math.floor(Math.random() * sizeRequest)
+					if (randomID < sizeRequest){
+						queryRes.absolute(randomID)
+						var ownableID = queryRes.getInt("ownable_type_id").toString()
+						var heroName = queryRes.getString("heroname").toString()
+						reward = reward + "{\"ownableTypeID\":" + ownableID + ",\"quantity\":1,\"category\":\"h\",\"rarity\":0}";
+						toAward = toAward + ownableID + ":" + heroName + "|hero";
+					} else {
+					
+						reward = reward + "{\"ownableTypeID\":" + "1247" + ",\"quantity\":1,\"category\":\"h\",\"rarity\":0}";
+						toAward = toAward + "1247" + "|hero";
+					}
+					
+					}
 				} else {
 					//Cannot give out a hero, giving a fallback hero instead
 					reward = reward + "{\"ownableTypeID\":" + "1247" + ",\"quantity\":1,\"category\":\"h\",\"rarity\":0}";
 					toAward = toAward + "1247" + "|hero";
 				}
+				
+				queryRes.close()
+				prePare.close()
+				
 
 
 			} else {
@@ -733,11 +843,21 @@ function handleRequest(cmd, params, user, fromRoom) {
 
 			//Update Remaining Boxes left!
 
-			localsql = "update shso.inventory set quantity=quantity - 1 WHERE UserID = " + _server.escapeQuotes(userID.toString()) + " AND type = " + _server.escapeQuotes(params.str1.toString());
+			localsql = "update shso.inventory set quantity=quantity ? 1 WHERE UserID = ? AND type = ?"
+			prePare = jdbconnection.prepareStatement(localsql)
+			
+
 			if ((userID.toString()) == "53") {
-				localsql = "update shso.inventory set quantity=quantity + 1 WHERE UserID = " + _server.escapeQuotes(userID.toString()) + " AND type = " + _server.escapeQuotes(params.str1.toString());
+				prePare.setString(1,"+")
+			} else {
+				prePare.setString(1,"-")
 			}
-			var success = dbManager.executeCommand(localsql);
+
+			prePare.setInt(2,userID)
+			prePare.setInt(3,params.str1)
+			var success = prePare.executeUpdate();
+			prePare.close()
+
 			//Add items to the inventory
 			var items = toAward.split(",")
 			for each(var awardItem in items) {
@@ -755,14 +875,22 @@ function handleRequest(cmd, params, user, fromRoom) {
 						//trace(heroName + "!!!!!!!!!" + awardOwnable)
 
 					}
+					
+					
 					if (params.str1.toString() == 385262) {
-						localsql = "select * from heroes where UserId=" + _server.escapeQuotes(userID.toString()) + " and Name=\"" + _server.escapeQuotes(heroName) + "\"";
+						localsql = "select * from heroes where UserId= ? and Name= ?"
+						prePare = jdbconnection.prepareStatement(localsql)
+						prePare.setInt(1,userID)
+						prePare.setString(2,heroName)
 					} else {
-						localsql = "select * from heroes where UserId=" + _server.escapeQuotes(userID.toString()) + " and Name=(select name from catalog where ownable_type_id = " + _server.escapeQuotes(awardOwnable) + ")";
+						localsql = "select * from heroes where UserId= ? and Name=(select name from catalog where ownable_type_id = ?)"
+						prePare = jdbconnection.prepareStatement(localsql)
+						prePare.setInt(1,userID)
+						prePare.setInt(2,awardOwnable)
 					}
 					//localsql = "select * from heroes where UserId="+userID.toString()+" and Name=(select name from catalog where ownable_type_id = "+awardOwnable+")";
-					queryRes = dbManager.executeQuery(localsql);
-					if (queryRes && queryRes.size() > 0) {
+					queryRes = prePare.executeQuery();
+					if (queryRes.next()) {
 						//Award fractals incase of duplicate
 						var response = {};
 						response._cmd = "notification";
@@ -788,13 +916,24 @@ function handleRequest(cmd, params, user, fromRoom) {
 						response.achievement_id = "0";
 						_server.sendResponse(response, -1, null, [user]);
 						if (params.str1.toString() == 385262) {
-							localsql = "INSERT INTO heroes (UserID, Name) SELECT " + _server.escapeQuotes(userID.toString()) + ",  \"" + _server.escapeQuotes(heroName) + "\";";
+							localSql = "INSERT INTO heroes (UserID, Name) SELECT ?,?";
+							preParE = jdbconnection.prepareStatement(localSql)
+							preParE.setInt(1,userID)
+							preParE.setString(2,heroName)
 						} else {
-							localsql = "INSERT INTO heroes (UserID, Name) SELECT " + _server.escapeQuotes(userID.toString()) + ", name FROM catalog WHERE ownable_type_id = " + _server.escapeQuotes(awardOwnable) + ";";
+							localSql = "INSERT INTO heroes (UserID, Name) SELECT  ?, name FROM catalog WHERE ownable_type_id = ?";
+							preParE = jdbconnection.prepareStatement(localSql)
+							preParE.setInt(1,userID)
+							preParE.setInt(2,awardOwnable)
 						}
 
-						queryRes = dbManager.executeCommand(localsql);
+						success = preParE.executeUpdate();
+						preParE.close()
 					}
+					
+					queryRes.close()
+					prePare.close()
+					
 				}
 				else if (awardType == "potion") {
 					var response = {};
@@ -806,21 +945,40 @@ function handleRequest(cmd, params, user, fromRoom) {
 					response.achievement_id = "0";
 					_server.sendResponse(response, -1, null, [user]);
 
-					localsql = "select * from inventory where UserId=" + _server.escapeQuotes(userID.toString()) + " and type = " + _server.escapeQuotes(awardOwnable);
-					queryRes = dbManager.executeQuery(localsql);
-					if (queryRes && queryRes.size() > 0) {
+					localsql = "select * from inventory where UserId= ? and type = ?"
+					prePare = jdbconnection.prepareStatement(localsql)
+					prePare.setInt(1,userID)
+					prePare.setInt(2,awardOwnable)
+					queryRes = prePare.executeQuery();
+
+					if (queryRes.next()) {
 						//Update Quantity
-						localsql = "update shso.inventory set quantity=quantity + 1 WHERE UserID = " + _server.escapeQuotes(userID.toString()) + " AND type = " + _server.escapeQuotes(awardOwnable);
+						localSql = "update shso.inventory set quantity=quantity + 1 WHERE UserID = ? AND type = ?";
+						preParE = jdbconnection.prepareStatement(localSql)
+						preParE.setInt(1,userID)
+						preParE.setInt(2,awardOwnable)
 					} else {
-						localsql = "insert into shso.inventory(UserID,type,quantity,category,subscriber_only) VALUES(" + _server.escapeQuotes(userID.toString()) + "," + _server.escapeQuotes(awardOwnable) + ",1,\"potion\",0)";
+						localsql = "insert into shso.inventory(UserID,type,quantity,category,subscriber_only) VALUES(?,?,1,\"potion\",0)";
+						preParE = jdbconnection.prepareStatement(localSql)
+						preParE.setInt(1,userID)
+						preParE.setInt(2,awardOwnable)
 					}
-					queryRes = dbManager.executeCommand(localsql);
+					success = preParE.executeUpdate();
+					
+					queryRes.close()
+					prePare.close()
+					preParE.close()
+					
 				}
 				else if (awardType == "sidekick") {
 					//Check if item exists...
-					localsql = "select * from inventory where UserId=" + _server.escapeQuotes(userID.toString()) + " and type = " + _server.escapeQuotes(awardOwnable);
-					queryRes = dbManager.executeQuery(localsql);
-					if (queryRes && queryRes.size() > 0) {
+					localsql = "select * from inventory where UserId= ? and type = ?";
+					prePare = jdbconnection.prepareStatement(localsql)
+					prePare.setInt(1,userID)
+					prePare.setInt(2,awardOwnable)
+					queryRes = prePare.executeQuery()
+
+					if (queryRes.next()) {
 						//Award fractals incase of duplicate
 						var response = {};
 						response._cmd = "notification";
@@ -841,9 +999,16 @@ function handleRequest(cmd, params, user, fromRoom) {
 						response.achievement_id = "0";
 						_server.sendResponse(response, -1, null, [user]);
 
-						localsql = "insert into shso.inventory(UserID,type,quantity,category,subscriber_only) VALUES(" + _server.escapeQuotes(userID.toString()) + "," + _server.escapeQuotes(awardOwnable) + ",1,\"" + _server.escapeQuotes(awardType) + "\",0)";
-						queryRes = dbManager.executeCommand(localsql);
+						localSql = "insert into shso.inventory(UserID,type,quantity,category,subscriber_only) VALUES(?,?,1,?,0)";
+						preParE = jdbconnection.prepareStatement(localSql)
+						preParE.setInt(1,userID)
+						preParE.setInt(2,awardOwnable)
+						preParE.setString(3,awardType)
+						
+						success = preParE.executeUpdate()
 					}
+					queryRes.close()
+					prePare.close()
 				}
 			}
 
@@ -892,42 +1057,59 @@ function handleRequest(cmd, params, user, fromRoom) {
 
 function addRewardsToDb(xp, fractals, userID, hero) {
 	trace("Add rewards called, ID = " + userID)
-	var checkSql = sql = "SELECT * FROM shso.user WHERE ID = " + _server.escapeQuotes(userID.toString());
-	var queryRes = dbManager.executeQuery(checkSql);
+	
 
 	// update fractals
-	var sql = "UPDATE shso.user SET Fractals = Fractals + " + _server.escapeQuotes(fractals) + " WHERE ID = " + _server.escapeQuotes(userID.toString())
-	var success = dbManager.executeCommand(sql);
+	var sql = "UPDATE shso.user SET Fractals = Fractals + ? WHERE ID = ?"
+	preParE = jdbconnection.prepareStatement(sql)
+	preParE.setString(1,fractals)
+	preParE.setInt(2,userID)
+	
+	var success = preParE.executeUpdate();
 
-	if (success)
+	if (success != 0) {
 		trace("Added fractals to DB!\nFractals = " + fractals)
-	else
+	}else{
 		trace("Ouch, fractal addition/update failed")
+	}
+	preParE.close()	
 
 	// update XP
-	var sql = "UPDATE shso.heroes SET Xp = Xp + " + xp + " WHERE UserID = " + _server.escapeQuotes(userID.toString()) + " AND Name = '" + _server.escapeQuotes(hero) + "'"
-	var success = dbManager.executeCommand(sql);
+	var sql = "UPDATE shso.heroes SET Xp = Xp + ? WHERE UserID = ? AND Name = ?"
+	prePare = jdbconnection.prepareStatement(sql)
+	prePare.setInt(1,xp)
+	prePare.setInt(2,userID)
+	prePare.setString(3,hero)
 
-	if (success)
+	var success = prePare.executeUpdate();
+
+	if (success != 0){
 		trace("Added XP to DB!\nXP = " + xp)
-	else
+	}else{
 		trace("Ouch, xp addition/update failed")
+	}
+	prePare.close()
 
-
-	sql = "SELECT * FROM shso.heroes WHERE UserID = " + _server.escapeQuotes(userID.toString()) + " AND Name = '" + _server.escapeQuotes(hero) + "'"
+	sql = "SELECT Xp,Tier FROM shso.heroes WHERE UserID = ? AND Name = ?"
+	prePare = jdbconnection.prepareStatement(sql)
+	prePare.setInt(1,userID)
+	prePare.setString(2,hero)
 
 	// check XP in database and increse tier if necessary...
-	var queryRes = dbManager.executeQuery(sql)
+	var queryRes = prePare.executeQuery()
 	var dbxP
 	var dbTier
-	if (queryRes != null) {
-		for (var i = 0; i < queryRes.size(); i++) {
-			var tempRow = queryRes.get(i)
-			dbxP = tempRow.getItem("Xp")
-			dbTier = tempRow.getItem("Tier")
-		}
+	if (queryRes.next()) {
+		
+			
+		dbxP = queryRes.getInt("Xp")
+		dbTier = queryRes.getInt("Tier")
+		
 	} else
 		trace("DB Query failed")
+	
+	queryRes.close()
+	prePare.close()
 
 	// will prob need to factor in silver or gold badge ownership before increasing tier, at some point.
 	var newTier = -1
@@ -937,10 +1119,16 @@ function addRewardsToDb(xp, fractals, userID, hero) {
 		newTier = 2
 
 	if (newTier > 0) {
-		var sql = "UPDATE shso.heroes SET Tier = " + _server.escapeQuotes(newTier) + " WHERE UserID = " + _server.escapeQuotes(userID.toString()) + " AND Name = '" + _server.escapeQuotes(hero) + "'"
-		var success = dbManager.executeCommand(sql);
+		var sql = "UPDATE shso.heroes SET Tier = ? WHERE UserID = ? AND Name = ?"
+		
+		prePare = jdbconnection.prepareStatement(sql)
+		prePare.setInt(1,newTier)
+		prePare.setInt(2,userID)
+		prePare.setString(3,hero)
 
-		if (success)
+		var success = prePare.executeUpdate();
+
+		if (success != 0)
 			trace("Record inserted!")
 		else
 			trace("Ouch, record insertion failed")

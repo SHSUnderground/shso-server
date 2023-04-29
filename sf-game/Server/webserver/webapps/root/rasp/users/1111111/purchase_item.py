@@ -43,7 +43,8 @@ class purchase_item(HttpServlet):
 		zone = ex.getZone('shs.all')
 
 		# Get a reference to database manager
-		db = zone.dbManager;
+		db = zone.dbManager
+		jdbconnection = db.getConnection()
 
 
 		# write debug info to log
@@ -92,24 +93,31 @@ class purchase_item(HttpServlet):
 		error = ""
 		shard_price = 999999
 		category = " "
-		sql = "SELECT shard_price, category, price_multiplier FROM shso.catalog WHERE catalog_ownable_id = " + catalog_ownable_id;
-		queryRes = db.executeQuery(sql)
-		if (queryRes == None) or (queryRes.size() == 0):
-			error = "db query failed"
+		sql = "SELECT shard_price, category, price_multiplier FROM shso.catalog WHERE catalog_ownable_id = ?"
+		prepare = jdbconnection.prepareStatement(sql)
+		prepare.setInt(1,catalog_ownable_id)
+
+		queryRes = prepare.executeQuery()
+		if (queryRes.next()):
+			shard_price = float(queryRes.getInt("shard_price"))
+			multiplier = queryRes.getFloat("price_multiplier")
+			shard_price *= multiplier
+			shard_price = int(round(shard_price))
+			category = queryRes.getString("category")
 		else:
-			for row in queryRes:
-				shard_price = float(row.getItem("shard_price"))
-				multiplier = float(row.getItem("price_multiplier"))
-				shard_price *= multiplier
-				shard_price = int(round(shard_price))
-				category = row.getItem("category")
+			error = "db query failed"
+		
+		queryRes.close()
+		prepare.close()
 
 
 		### CHECK IF PLAYER HAS ENOUGH FUNDS TO COMPLETE THE PURCHASE
 		error = ""
 		fractals = -1
-		sql = "SELECT Fractals FROM shso.user WHERE Paid = 1 AND ID = " + playerID;
+		sql = "SELECT Fractals FROM shso.user WHERE Paid = 1 AND ID = " + playerID
 		queryRes = db.executeQuery(sql)
+
+
 		if (queryRes == None) or (queryRes.size() == 0):
 			error = "db query failed"
 		else:
@@ -119,23 +127,31 @@ class purchase_item(HttpServlet):
 			# insert purchased hero into heroes table
 			error = ""
 			usersStr = ""
-			sql = "INSERT INTO shso.heroes (UserID, Name) SELECT " + playerID + ", name FROM catalog WHERE catalog_ownable_id = " + catalog_ownable_id + ";"
+			sql = "INSERT INTO shso.heroes (UserID, Name) SELECT ?, name FROM catalog WHERE catalog_ownable_id = ?"
+			prePareR = jdbconnection.prepareStatement(sql)
+			prePareR.setInt(1,playerID)
+			prePareR.setInt(2,catalog_ownable_id)
 
-			success = db.executeCommand(sql)
-			if (success):
+			success = prePareR.executeUpdate()
+			if (success != 0):
 				error = "no error"
 			else:
 				error = "db command failed"
-
+			prePareR.close()
 			# SUBTRACT COST FROM PLAYER FRACTALS IN DB 
 			error = ""
-			sql = "UPDATE shso.user SET Fractals = " + str(fractals - shard_price) + "  WHERE ID = " + playerID
+			sql = "UPDATE shso.user SET Fractals = ? WHERE ID = ?"
+			prePareR = jdbconnection.prepareStatement(sql)
+			prePareR.setInt(1,fractals - shard_price)
+			prePareR.setInt(2,playerID)
 
-			success = db.executeCommand(sql)
-			if (success):
+			success = prePareR.executeUpdate()
+			if (success != 0):
 				error = "no error"
 			else:
 				error = "db command failed"
+			
+			prePareR.close()
 
 
 			responseStatus = "200"
@@ -162,7 +178,7 @@ class purchase_item(HttpServlet):
 		
 		w.close()
 
-		
+		jdbconnection.close()
 	
 		#pass
 		

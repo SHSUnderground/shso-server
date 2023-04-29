@@ -53,7 +53,7 @@ class friendsremove(HttpServlet):
 
 		# Get a reference to database manager
 		db = zone.dbManager;
-
+		jdbconnection = db.getConnection()
 		userID = None
 		session_token = None
 		# Get parameters
@@ -73,15 +73,19 @@ class friendsremove(HttpServlet):
 				rel = request.getParameter(name)
 
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
-			tokenQuery = db.executeQuery(getUserID)
+			getUserID = "SELECT * from tokens WHERE token= ?"
+			prepare = jdbconnection.prepareStatement(getUserID)
+			prepare.setString(1,session_token)
+			tokenQuery = prepare.executeQuery()
 			# userID = None
 			
 			
-			if tokenQuery.size() > 0:
-				userID = tokenQuery[0].getItem("userID")
+			if tokenQuery.next():
+				userID = tokenQuery.getInt("userID")
 
-
+			tokenQuery.close()
+			prepare.close()
+		
 		# write debug info to log
 		#sql = "INSERT INTO shso.log (Info) VALUES('entering friendsremove.py');"
 		#success = db.executeCommand(sql)
@@ -112,14 +116,19 @@ class friendsremove(HttpServlet):
 		# delete friend from friends table
 		error = ""
 		usersStr = ""
-		sql = "DELETE FROM shso.friends WHERE PlayerID = " + playerID + " AND  FriendID = " + str(target) +";"
+		sql = "DELETE FROM shso.friends WHERE PlayerID = ? AND  FriendID = ? "
+		prePareR = jdbconnection.prepareStatement(sql)
+		prePareR.setInt(1,playerID)
+		prePareR.setInt(2,target)
 
-		success = db.executeCommand(sql)
-		if (success):
+		success = prePareR.executeUpdate()
+		if (success != 0):
 			error = "no error"
 		else:
 			error = "db command failed"
 
+		prePareR.close()
+		jdbconnection.close()
 		w = response.getWriter()
 
 

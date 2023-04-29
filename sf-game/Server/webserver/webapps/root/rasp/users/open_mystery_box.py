@@ -53,8 +53,8 @@ class open_mystery_box(HttpServlet):
 		#targetExtension = zone.getExtension("escrow");
 
 		# Get a reference to database manager
-		db = zone.dbManager;
-
+		db = zone.dbManager
+		jdbconnection = db.getConnection()
 		userID = None
 		session_token = None
 		sidekick_id = None
@@ -68,14 +68,19 @@ class open_mystery_box(HttpServlet):
 				session_token = request.getParameter(name)
 		# getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
-			tokenQuery = db.executeQuery(getUserID)
+			getUserID = "SELECT * from tokens WHERE token= ?"
+			prepare = jdbconnection.prepareStatement(getUserID)
+			prepare.setString(1,session_token)
+			tokenQuery = prepare.executeQuery()
 			# userID = None
 			
 			
-			if tokenQuery.size() > 0:
-				userID = tokenQuery[0].getItem("userID")
+			if tokenQuery.next():
+				userID = tokenQuery.getInt("userID")
 
+			tokenQuery.close()
+			prepare.close()
+			jdbconnection.close()
 		# # Update/Insert db record for this player
 		# error = ""
 		# sql = "INSERT INTO shso.equips (UserID, sidekick_id) values (" + userID + ", '" + sidekick_id + "') ON DUPLICATE KEY UPDATE sidekick_id = " + sidekick_id

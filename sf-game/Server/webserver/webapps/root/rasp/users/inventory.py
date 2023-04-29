@@ -54,7 +54,7 @@ class inventory(HttpServlet):
 
 		# Get a reference to database manager
 		db = zone.dbManager;
-
+		jdbconnection = db.getConnection()
 		userID = None
 		session_token = None
 		#userID = "3870526"   # this line for doGet testing only !!!!!!!!!!!!!!!
@@ -67,15 +67,19 @@ class inventory(HttpServlet):
 				session_token = request.getParameter(name)
 
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
-			tokenQuery = db.executeQuery(getUserID)
+			getUserID = "SELECT * from tokens WHERE token= ?"
+			prepare = jdbconnection.prepareStatement(getUserID)
+			prepare.setString(1,session_token)
+			tokenQuery = prepare.executeQuery()
 			# userID = None
 			
 			
-			if tokenQuery.size() > 0:
-				userID = tokenQuery[0].getItem("userID")
+			if tokenQuery.next():
+				userID = tokenQuery.getInt("userID")
  
-
+			tokenQuery.close()
+			prepare.close()
+			jdbconnection.close()
 		# Get db record for this player
 		error = ""
 		usersStr = ""
