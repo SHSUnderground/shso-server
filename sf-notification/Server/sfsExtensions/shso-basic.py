@@ -61,7 +61,7 @@ def handleInternalEvent(evt):
 			
 			#if client version isnt what is expected, do the following:
 			valid = False
-			if (cliVer == validCliVer and md5hash == validchecksum) or (nick in ['Titan', 'TestAccount', 'TestAccount2', 'TestAccount3', 'TestAccount4'] and debugFlags == '1'):
+			if (cliVer == validCliVer):
 				valid = True
 			if valid == False:
 				user = _server.getUserByChannel(chan)
