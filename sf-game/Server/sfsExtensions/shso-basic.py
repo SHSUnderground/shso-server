@@ -108,8 +108,7 @@ def handleInternalEvent(evt):
 				_server.trace("userID= " + str(user.getUserId()))
 				_server.trace("userVariable= " + str(user.getVariable('Ready')))
 			
-		UserCheckQueryResult.close()
-		prepareStatement.close()
+		
 			
 
 			#Remove any previous active_potions
@@ -125,6 +124,9 @@ def handleInternalEvent(evt):
 
 		_server.trace("Calling sendResponse()!")
 		_server.sendResponse(response, -1, None, chan)
+
+		UserCheckQueryResult.close()
+		prepareStatement.close()
 
 
 		######### send playerVars msg back for this user. needs more work, for now just username is needed. #####
