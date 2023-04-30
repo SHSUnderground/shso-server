@@ -61,11 +61,13 @@ def handleInternalEvent(evt):
 		session_token = None
 		userIP = chan.socket().getInetAddress().getHostAddress()
 		queryRes = None
-		checkSQL = "SELECT * FROM user WHERE username = ? AND Password = ?"
+
+		getUserSQLCommand = "SELECT * FROM user WHERE username=? AND MD5(CONCAT(?, Password))=?"
+		prePareR = jdbconnection.prepareStatement(getUserSQLCommand)
+		prePareR.setString(1,nick)
+		prePareR.setString(2,key)
+		prePareR.setString(3,passw)
 		
-		prepareStatement= jdbconnection.prepareStatement(checkSQL)
-		prepareStatement.setString(1,nick)
-		prepareStatement.setString(2,passw)
 		UserCheckQueryResult = prePareR.executeQuery()
 
 		if (UserCheckQueryResult.next()):
