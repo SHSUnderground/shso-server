@@ -148,11 +148,9 @@ def handleInternalEvent(evt):
 					prePareRtimestamp.setString(2,nick)
 					
 					rowsAffected = prePareRtimestamp.executeUpdate()
-
+					prePareRtimestamp.close()
 				
 				result.close()
-
-				prePareRtimestamp.close()
 				prePareR.close()
 				
 				
