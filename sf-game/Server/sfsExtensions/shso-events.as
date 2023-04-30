@@ -1129,9 +1129,13 @@ function addRewardsToDb(xp, fractals, userID, hero) {
 		var success = prePare.executeUpdate();
 
 		if (success != 0)
+		{
 			trace("Record inserted!")
+		}
 		else
+		{
 			trace("Ouch, record insertion failed")
+		}
 	}
 
 

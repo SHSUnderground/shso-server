@@ -94,9 +94,13 @@ function storeMissionPlayers(userID, missionID) {
 		var success = prePareR.executeUpdate()
 				
 		if (success != 0)
+		{
 			trace("Mission record inserted!")
+		}
 		else
+		{
 			trace("Ouch, mission record insertion failed")
+		}
 		
 		prePareR.close()
 	}
@@ -112,9 +116,13 @@ function removeMissionPlayers(userID) {
 	var success = prePareRqremove.executeUpdate()
 				
 	if (success != 0)
+	{
 		trace("Record deleted!")
+	}
 	else
+	{
 		trace("Ouch, record deletion failed")
+	}
 	
 	prePareRqremove.close()
 }
@@ -594,9 +602,13 @@ function handleInternalEvent(evt)
 	var success = prePareRemove.executeUpdate();
 				
 		if (success != 0)
+		{
 			trace("Record deleted!")
+		}
 		else
+		{
 			trace("Ouch, record deletion failed")
+		}
 	
 	prePareRemov.close()
 
@@ -710,10 +722,14 @@ function handleHeroCreate(params, user, room)
 	trace("sql= " + insertSql);
 	var success = prePareRin.executeUpdate()
 
-		if (success != 0)
+	if (success != 0)
+	{
 		trace("Record inserted!")
+	}
 	else
+	{
 		trace("Ouch, record insertion failed")
+	}
 	prePareRin.close()
 	/////////////////////////////////////////////////////////////////////
 

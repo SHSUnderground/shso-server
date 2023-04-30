@@ -171,9 +171,13 @@ function handleSendRoomMsg(params, user, room)
 	var success = prePareR.executeUpdate()
 
 	if (success != 0)
+	{
 		trace("Record inserted!")
+	}
 	else
+	{
 		trace("Ouch, record insertion failed")
+	}
 
 	// logMessage = "[" + room_name + "] " + sender_player_id + ": " + Base64.decode64(message);
 	// _server.writeFile("chat.txt", logMessage, True);
