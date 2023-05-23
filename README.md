@@ -9,7 +9,7 @@ Rough instructions:
 - Edit the `config.xml` file in both folders and provide the DB's username and password, for XAMPP defaults are username: `root` and password is blank, don't put anything for the password, leave it empty.
 - Edit all `sf-game/` and `sf-notification/` paths across all scripts to point to the absolute path (like, `/home/user/sf-game/` for Linux and `D:\folder\sf-game\` for Windows.
 - Start the server by running a terminal window in both folders and type `.\start.sh` (for Linux, for Windows it is `.\start.bat`, don't forget to `cd` to the folder in both cases).
-` Don't forget to edit the IP in the game's `AssetBundles\Configuration\server.xml`.
+- Don't forget to edit the IP in the game directory's `AssetBundles\Configuration\server.xml`.
 # Contributing
 Make a fork and submit a PR with your changes.
 This requires understanding in ActionScript (similar to JavaScript) and Python to understand the server code, but you will also need to check the game client repo [SHSUnderground/shso-unity-project](https://github.com/SHSUnderground/shso-unity-project) to understand what responses are missing and how to format them, so both Unity and C# understanding is required.
