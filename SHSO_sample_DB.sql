@@ -1,5 +1,4 @@
-DROP DATABASE IF EXISTS `shso`;
-CREATE DATABASE `shso`;
+CREATE DATABASE IF NOT EXISTS `shso`;
 USE `shso`;
 -- MySQL dump 10.13  Distrib 8.0.27, for Win64 (x86_64)
 --
