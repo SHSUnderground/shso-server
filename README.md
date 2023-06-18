@@ -1,5 +1,13 @@
 # Server files
-Rough instructions:
+This repo contains the required files to host a game server for the game remake of SHSO. For the game client, go to [SHSUnderground/shso-unity-project](https://github.com/SHSUnderground/shso-unity-project).
+# Contact
+## Support
+For any help with any in-game issues go to the official server below:  
+<a href="https://discord.gg/cVSYeVa2Gg"><img src="https://discordapp.com/api/guilds/735244842921099427/widget.png?style=banner3" alt="Support Server"></a>
+## Dev Discussion
+Go to `#development-only` in the community server below:  
+<a href="https://discord.gg/PH54Utcm5Y"><img src="https://discordapp.com/api/guilds/895805639979331635/widget.png?style=banner3" alt="Community Server"></a>
+# Rough instructions:
 - Download Smartfox Server Pro 1.6.6 (commonly shortened to SFS Pro) from its official website.
 - Extract it twice to two folders called `sf-notification` and `sf-game` (make sure it doesn't have an SFS_1.6.6 folder in it, extract the contents of SFS_1.6.6 folder into these two folders) .
 - Copy the contents `sf-notification` and `sf-game` files into the extracted files respectively. Replace if necessary.
