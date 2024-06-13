@@ -24,31 +24,28 @@ USE `shso`;
 DROP TABLE IF EXISTS `active_missions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
+-- Table structure for table `active_missions`
+DROP TABLE IF EXISTS `active_missions`;
 CREATE TABLE `active_missions` (
-  `UserID` int NOT NULL,
-  `MissionID` varchar(50) DEFAULT NULL,
+  `UserID` INT NOT NULL,
+  `MissionID` VARCHAR(50) DEFAULT NULL,
   PRIMARY KEY (`UserID`),
-  CONSTRAINT `UserID_Foriegn` FOREIGN KEY (`UserID`) REFERENCES `user` (`ID`)
+  CONSTRAINT `UserID_Foreign` FOREIGN KEY (`UserID`) REFERENCES `user` (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
 -- Table structure for table `active_players`
---
-
 DROP TABLE IF EXISTS `active_players`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `active_players` (
-  `SfUserID` int NOT NULL,
-  `ShsoUserID` int NOT NULL,
-  `SfRoomID` int NOT NULL,
-  `Hero` varchar(45) NOT NULL,
-  `RoomType` int NOT NULL DEFAULT '-1' COMMENT 'RoomType values -1=uninitialized 0=lobby 1=bugle 2=baxter 3=asgard 4=villainville 5=daily mission 6=invite-to-mission\n			',
-  `BlobText` mediumtext NOT NULL,
+  `SfUserID` INT NOT NULL,
+  `ShsoUserID` INT NOT NULL,
+  `SfRoomID` INT NOT NULL,
+  `Hero` VARCHAR(45) NOT NULL,
+  `RoomType` INT NOT NULL DEFAULT '-1' COMMENT 'RoomType values -1=uninitialized 0=lobby 1=bugle 2=baxter 3=asgard 4=villainville 5=daily mission 6=invite-to-mission',
+  `BlobText` MEDIUMTEXT NOT NULL,
   PRIMARY KEY (`SfUserID`),
   UNIQUE KEY `SfUserID_UNIQUE` (`SfUserID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -69,34 +66,31 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `active_potion_effects`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
+-- Table structure for table `active_potion_effects`
+DROP TABLE IF EXISTS `active_potion_effects`;
 CREATE TABLE `active_potion_effects` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `userid` int NOT NULL,
-  `request_id` int NOT NULL,
-  `hero_name` varchar(30) NOT NULL,
-  `ownable_type_id` int NOT NULL,
-  `start_timestamp` timestamp NOT NULL DEFAULT (now()),
-  `end_timestamp` timestamp NOT NULL DEFAULT ((now() + interval 1 hour)),
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `userid` INT NOT NULL,
+  `request_id` INT NOT NULL,
+  `hero_name` VARCHAR(30) NOT NULL,
+  `ownable_type_id` INT NOT NULL,
+  `start_timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `end_timestamp` TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP + INTERVAL 1 HOUR),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=915 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
 -- Table structure for table `allheroes`
---
-
 DROP TABLE IF EXISTS `allheroes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `allheroes` (
-  `UserID` int NOT NULL,
-  `Name` varchar(50) NOT NULL,
-  `Xp` int NOT NULL DEFAULT '0',
-  `Tier` int NOT NULL DEFAULT '0',
-  `Code` varchar(64) NOT NULL,
-  `DateAquired` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `UserID` INT NOT NULL,
+  `Name` VARCHAR(50) NOT NULL,
+  `Xp` INT NOT NULL DEFAULT '0',
+  `Tier` INT NOT NULL DEFAULT '0',
+  `Code` VARCHAR(64) NOT NULL,
+  `DateAcquired` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`UserID`,`Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
