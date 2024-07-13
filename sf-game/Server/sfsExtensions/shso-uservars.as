@@ -63,13 +63,30 @@ function init()
 * Always make sure to release resources like setInterval(s)
 * open files etc in this method.
 * 
-* In this case we delete the reference to the databaseManager
+* In this case we devare the reference to the databaseManager
 */
 function destroy()
 {
-	trace("Bye bye!")
-        // Release the reference to the dbase manager
-        delete dbase
+	trace("Bye bye!");
+	// Release the reference to the dbase manager
+	// devare dbase;
+	delete dbase;
+}
+
+
+function getUserIdFromSFS(user) {
+
+	// var sql = "select * from active_players where SfUserID =" + _server.escapeQuotes(sfsID) + ";";
+	// queryRes = dbManager.executeQuery(sql);
+	// if (queryRes && queryRes.size() > 0) {
+	// 	return queryRes.get(0).getItem("ShsoUserID");
+	// }
+	var userIDSQL = "SELECT ID from user WHERE Username='" + _server.escapeQuotes(user.getName()) + "' OR Nick = '" + _server.escapeQuotes(user.getName()) + "';";
+		var queryRes = dbManager.executeQuery(userIDSQL);
+		if (queryRes && queryRes.size() > 0) {
+			return queryRes.get(0).getItem("ID");
+		}
+
 }
 
 
@@ -212,13 +229,35 @@ function handleUserVars(params, user, room)
 			trace("SfUserID=" + tempRow.getItem("SfUserID").toString());
 			// var pvUser = _server.getUserById(parseInt(tempRow.getItem("SfUserID")));
 			var sql = "SELECT * FROM shso.user WHERE id = " + _server.escapeQuotes(tempRow.getItem("ShsoUserID").toString());
-			var queryResName = dbManager.executeQuery(sql);
-			var player_name = queryResName.get(0).getItem("Username").toString();
+			// var queryResName = dbManager.executeQuery(sql);
+			// var player_name = queryResName.get(0).getItem("Username").toString();
+			var player_name = user.getName();
 
 			res = [];
 			res[0] = "playerVars";
-			res[1] = tempRow.getItem("SfUserID").toString() + "|" + tempRow.getItem("ShsoUserID").toString() + "|" + player_name + "|true|1|1";
-			// trace("Res[1]: " + res[1]);
+			// var sql = 'SELECT heroes.* FROM shso.heroes, shso.user WHERE heroes.UserID = user.ID AND user.ID = ' + _server.escapeQuotes(userID);
+			var userID = getUserIdFromSFS(user);
+			var player_name = user.getName();
+			var squadlvlsql = "select CalculateSquadLevel(" + _server.escapeQuotes(userID) + ") AS `squadlevel`";
+			var lvlsql = "select GETLVL((SELECT XP from shso.heroes WHERE UserID = " + _server.escapeQuotes(userID) + " AND name = (SELECT hero_name from shso.equips WHERE UserID = " + _server.escapeQuotes(userID) + "))) AS `hero_level`";
+			var squad_level = 0;
+			var hero_level = 0;
+			var lvlQueryRes = dbManager.executeQuery(lvlsql);
+			var squadlvlQueryRes = dbManager.executeQuery(squadlvlsql);
+			if (lvlQueryRes && lvlQueryRes.size() > 0) {
+				hero_level = lvlQueryRes.get(0).getItem("hero_level");
+			}
+			if (squadlvlQueryRes && squadlvlQueryRes.size() > 0) {
+				squad_level = squadlvlQueryRes.get(0).getItem("squadlevel");
+			}
+			
+
+			// res[1] = tempRow.getItem("SfUserID").toString() + "|" + tempRow.getItem("ShsoUserID").toString() + "|" + player_name + "|true|" + hero_level.toString() + "|" + squadlevel.toString();
+			// res[1] = tempRow.getItem("SfUserID").toString() + "|" + tempRow.getItem("ShsoUserID").toString() + "|" + player_name + "|true|1|1";
+			// res[1] = tempRow.getItem("SfUserID").toString() + "|" + tempRow.getItem("ShsoUserID").toString() + "|" + player_name.toString() + "|" + user.isModerator.toString() + "|" + hero_level.toString() + "|" + squadlevel.toString();
+			res[1] = tempRow.getItem("SfUserID").toString() + "|" + tempRow.getItem("ShsoUserID").toString() + "|" + player_name + "|" + (user.isModerator == true ? "True" : "False") + "|" + hero_level + "|" + squad_level;
+			// trace("USERVARS: " + res[1])
+			// res[1] = tempRow.getItem("SfUserID").toString() + "|" + tempRow.getItem("ShsoUserID").toString() + "|" + player_name.toString() + "|" + (user.isModerator | 0).toString() + "|1|1";
 			//_server.sendResponse(res, -1, null, [user], "str")
 			_server.sendResponse(res, -1, null, users, "str");
 

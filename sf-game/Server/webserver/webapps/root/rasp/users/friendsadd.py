@@ -1,6 +1,6 @@
 #
 # friends add request
-# 
+#
 #
 
 import sys
@@ -12,8 +12,8 @@ import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper
 ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
-sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
-import pylibcsp 
+sys.path.append('sf-game/Server/webserver/webapps/root/pylibcsp')
+import pylibcsp
 
 def escapeQuotes(string):
 	string2 = str(string).replace( '"', '\"')
@@ -26,15 +26,15 @@ class friendsadd(HttpServlet):
 	def __init__(self):
 		self.htmlHead = "<html><head></head><body style='font-family:Verdana'>"
 		self.closeHtml = "</body></html>"
-	
+
 
 	#
 	# Handle GET requests  (this gets called from browser)
 	#
-	def doGet(self, request, response):		
+	def doGet(self, request, response):
 		pass
 
-		
+
 	#
 	# Handle POST requests (the client app is doing a POST request to anyone.py)
 	#
@@ -46,7 +46,7 @@ class friendsadd(HttpServlet):
 		#Zone zone = SmartFoxServer.getInstance().getZone("testZone");
 		zone = ex.getZone('shs.all')
 
-		# Get a reference to the Extension we want to call 
+		# Get a reference to the Extension we want to call
 		#targetExtension = zone.getExtension("escrow");
 
 		# Get a reference to database manager
@@ -54,7 +54,7 @@ class friendsadd(HttpServlet):
 
 		userID = None
 		session_token = None
-		pname = None
+		friend_username = None
 		#userID = "3870526"   # this line for doGet testing only !!!!!!!!!!!!!!!
 		for name in request.getParameterNames():
 			# if (name == "user"):
@@ -64,29 +64,29 @@ class friendsadd(HttpServlet):
 			if (name == "AS_SESSION_KEY"):
 				session_token = request.getParameter(name)
 			if (name == "target_name"):
-				pname = request.getParameter(name)
+				friend_username = request.getParameter(name)
 
 		if session_token is not None:
 			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
 			tokenQuery = db.executeQuery(getUserID)
 			# userID = None
-			
-			
+
+
 			if tokenQuery.size() > 0:
 				userID = tokenQuery[0].getItem("userID")
 
-			
+
 		# Get potential friend's ID from name
 		error = ""
 		friendID = 0
-		sql = "SELECT user.ID FROM shso.user user WHERE user.Username = '" + escapeQuotes(value) + "'"
+		sql = "SELECT user.ID FROM shso.user user WHERE user.Username = '" + escapeQuotes(friend_username) + "'"
 		queryRes = db.executeQuery(sql)
 		if (queryRes == None) or (queryRes.size() == 0):
-			error = "db query failed"			
-		if error == "":			
+			error = "db query failed"
+		if error == "":
 			for row in queryRes:
 				friendID = row.getItem("ID")
-				
+
 
 		# get the player ID, which is the immediate parent dir name
 		playerID = userID
@@ -126,10 +126,10 @@ class friendsadd(HttpServlet):
 
 
 		#w.println(self.htmlHead)
-				
+
 		#w.println("<h2>CSP TEST - SmartFoxServer :: Status</h2><hr>")
 		#w.println("<table cellpadding='6' cellspacing='0' border='0'>")
-		#w.println("<tr bgcolor='#eeeeee'><th align='left'>Key</th><th align='left'>Value</th></tr>")	
+		#w.println("<tr bgcolor='#eeeeee'><th align='left'>Key</th><th align='left'>Value</th></tr>")
 		#w.println("</table><hr>")
 
 
@@ -138,7 +138,7 @@ class friendsadd(HttpServlet):
 		w.println("  <headers>")
 		w.println("    <Content-Type>text/html; charset=utf-8</Content-Type>")
 		w.println("  </headers>")
-		w.println("  <body>&lt;relationships&gt;")		
+		w.println("  <body>&lt;relationships&gt;")
 		w.println("  &lt;friends&gt;")
 
 		w.println("  &lt;/friends&gt;")
@@ -146,20 +146,19 @@ class friendsadd(HttpServlet):
 		w.println("  &lt;/ignores&gt;")
 		w.println("&lt;/relationships&gt;")
 		w.println("  </body>")
-		w.println("</response>")		
+		w.println("</response>")
 
 
 		#w.println(arrList.get(0))
 		#w.println(arrList.get(1))
-		#w.println(usersStr)		
+		#w.println(usersStr)
 		#w.println(error)
 
 
-		
+
 		#w.println(self.closeHtml)
 		w.close()
 
-	
+
 		#pass
-		
-		
+

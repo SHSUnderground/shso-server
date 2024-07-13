@@ -44631,9 +44631,684 @@
     {
       "cat": "h",
       "hints": "",
-      "id": 666666,
+      "id": 6666666,
       "meta": "",
-      "name": "Titan",
+      "name": "titan",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 1000001,
+      "meta": "",
+      "name": "carnage_playable_reskin_spider_carnage",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000001,
+      "meta": "",
+      "name": "abomination2_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000002,
+      "meta": "",
+      "name": "abomination_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000003,
+      "meta": "",
+      "name": "annilhlus_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000004,
+      "meta": "",
+      "name": "bowman",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000005,
+      "meta": "",
+      "name": "bowman_villain",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000006,
+      "meta": "",
+      "name": "bullseye_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000007,
+      "meta": "",
+      "name": "doombot_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000008,
+      "meta": "",
+      "name": "dormammu_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000009,
+      "meta": "",
+      "name": "dracula_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000010,
+      "meta": "",
+      "name": "dr_doom_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000011,
+      "meta": "",
+      "name": "dr_octopus_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000012,
+      "meta": "",
+      "name": "enchantress2_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000013,
+      "meta": "",
+      "name": "enchantress3_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000014,
+      "meta": "",
+      "name": "enchantress4_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000015,
+      "meta": "",
+      "name": "enchantress_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000016,
+      "meta": "",
+      "name": "fin_fang_foom_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000017,
+      "meta": "",
+      "name": "green_goblin_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000018,
+      "meta": "",
+      "name": "hammer",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000019,
+      "meta": "",
+      "name": "hand_ninja_lieutenant",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000020,
+      "meta": "",
+      "name": "iron_patriot_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000021,
+      "meta": "",
+      "name": "iron_patriot_villain",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000022,
+      "meta": "",
+      "name": "juggernaut_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000023,
+      "meta": "",
+      "name": "kingpin_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000024,
+      "meta": "",
+      "name": "leader_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000025,
+      "meta": "",
+      "name": "lizardling",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000026,
+      "meta": "",
+      "name": "lizard_boss_1",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000027,
+      "meta": "",
+      "name": "loki1_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000028,
+      "meta": "",
+      "name": "loki2_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000029,
+      "meta": "",
+      "name": "loki_avengers_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000030,
+      "meta": "",
+      "name": "loki_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000031,
+      "meta": "",
+      "name": "loki_classic_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000032,
+      "meta": "",
+      "name": "magneto2_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000033,
+      "meta": "",
+      "name": "magneto3_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000034,
+      "meta": "",
+      "name": "magneto_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000035,
+      "meta": "",
+      "name": "malekith_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000036,
+      "meta": "",
+      "name": "militant_villain",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000037,
+      "meta": "",
+      "name": "modok_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000038,
+      "meta": "",
+      "name": "moleman_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000039,
+      "meta": "",
+      "name": "mysterio_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000040,
+      "meta": "",
+      "name": "mysterio_faux_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000041,
+      "meta": "",
+      "name": "mysterio_faux_mob",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000042,
+      "meta": "",
+      "name": "mysterio_giant",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000043,
+      "meta": "",
+      "name": "mystique_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000044,
+      "meta": "",
+      "name": "onslaught_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000045,
+      "meta": "",
+      "name": "professor_x",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000046,
+      "meta": "",
+      "name": "red_skull_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000047,
+      "meta": "",
+      "name": "sabretooth_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000048,
+      "meta": "",
+      "name": "spider_man_villain",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000049,
+      "meta": "",
+      "name": "super_skrull_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000050,
+      "meta": "",
+      "name": "surtur_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000051,
+      "meta": "",
+      "name": "tactical_force",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000052,
+      "meta": "",
+      "name": "tactical_force_villain",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000053,
+      "meta": "",
+      "name": "thanos_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000054,
+      "meta": "",
+      "name": "titanium_man_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000055,
+      "meta": "",
+      "name": "ultron_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000056,
+      "meta": "",
+      "name": "ultron_boss_mini",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000057,
+      "meta": "",
+      "name": "venom_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000058,
+      "meta": "",
+      "name": "venom_boss_mayhem",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000059,
+      "meta": "",
+      "name": "wendigo_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000060,
+      "meta": "",
+      "name": "whiplash",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000061,
+      "meta": "",
+      "name": "whiplash_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000062,
+      "meta": "",
+      "name": "winter_solder_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000063,
+      "meta": "",
+      "name": "ymir_boss",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000064,
+      "meta": "",
+      "name": "militant",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000065,
+      "meta": "",
+      "name": "ymir_christmas",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000066,
+      "meta": "",
+      "name": "npc_male_shield",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000067,
+      "meta": "",
+      "name": "npc_male_01",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000068,
+      "meta": "",
+      "name": "npc_male_01_fall",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000069,
+      "meta": "",
+      "name": "npc_male_christmas_01",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000070,
+      "meta": "",
+      "name": "npc_male_shield_01",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000071,
+      "meta": "",
+      "name": "npc_male_02",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000072,
+      "meta": "",
+      "name": "npc_male_03",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000073,
+      "meta": "",
+      "name": "npc_male_04",
+      "rel": 1,
+      "sub": 0
+    },
+    {
+      "cat": "h",
+      "hints": "",
+      "id": 20000074,
+      "meta": "",
+      "name": "watcher",
       "rel": 1,
       "sub": 0
     }

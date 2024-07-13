@@ -12,8 +12,8 @@ import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper
 ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
-sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
-import pylibcsp 
+sys.path.append('sf-game/Server/webserver/webapps/root/pylibcsp')
+import pylibcsp
 
 
 def escapeQuotes(string):

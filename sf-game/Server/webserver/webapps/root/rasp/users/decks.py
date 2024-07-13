@@ -22,7 +22,7 @@ def escapeQuotes(string):
 	string2 = string2.replace("\\", "\\\\")
 	return string2
 
-class cards(HttpServlet):
+class decks(HttpServlet):
 
 	def __init__(self):
 		self.htmlHead = "<html><head></head><body style='font-family:Verdana'>"
@@ -121,30 +121,38 @@ class cards(HttpServlet):
 		w.println("	<Content-Type>text/html; charset=utf-8</Content-Type>")
 		w.println("  </headers>")
 		w.println("  <body>")
-		w.println("  &lt;cards&gt;")
-		cardsstr = "ST005:1;ST038:1;ST047:2;ST048:4;ST105:1;ST142:4;ST148:2;ST150:4;ST165:4;ST172:4;ST183:4;ST187:4;ST194:1;ST272:1;ST353:3"
-		cardsstr = cardsstr.split(";")
-		if userID == '53':
-			for card in cardsstr:
-				card = card.split(":")
-				card_id = card[0]
-				card_quantity = card[1]
-				w.println("    &lt;card&gt;")
-				w.println("      &lt;type&gt;" + card_id + "&lt;/type&gt;")
-				w.println("      &lt;count&gt;" + card_quantity + "&lt;/count&gt;")
-				w.println("    &lt;/card&gt;")
-		for row in queryRes2:
-			card_id = row.getItem("type")
-			card_quantity = row.getItem("quantity")
-			w.println("    &lt;card&gt;")
-			w.println("      &lt;type&gt;" + card_id + "&lt;/type&gt;")
-			w.println("      &lt;count&gt;" + card_quantity + "&lt;/count&gt;")
-			w.println("    &lt;/card&gt;")
+		w.println("  &lt;Decks&gt;")
+		'''
+		DataWarehouse data = dataWarehouse.GetData("Decks/Deck", i);
+		DeckProperties deckProperties = new DeckProperties();
+		deckProperties.DeckName = data.GetString("Name");
+		deckProperties.DeckRecipe = data.GetString("Cards");
+		deckProperties.DeckId = data.GetInt("ID");
+		deckProperties.ReadOnly = data.GetBool("Readonly");
+		deckProperties.Legal = data.GetBool("Legal");
+		deckProperties.HeroName = "spider_man";
+		'''
+		w.println("    &lt;Deck&gt;")
+		w.println("      &lt;Name&gt;" + "Starter Deck" + "&lt;/Name&gt;")
+		w.println("      &lt;Cards&gt;" + "ST005:1;ST038:1;ST047:2;ST048:4;ST105:1;ST142:4;ST148:2;ST150:4;ST165:4;ST172:4;ST183:4;ST187:4;ST194:1;ST272:1;ST353:3" + "&lt;/Cards&gt;")
+		w.println("      &lt;ID&gt;" + "0" + "&lt;/ID&gt;")
+		w.println("      &lt;Readonly&gt;" + "true" + "&lt;/Readonly&gt;")
+		w.println("      &lt;Legal&gt;" + "true" + "&lt;/Legal&gt;")
+
+
+		w.println("    &lt;/Deck	&gt;")
+		# for row in queryRes2:
+		# 	card_id = row.getItem("type")
+		# 	card_quantity = row.getItem("quantity")
+		# 	w.println("    &lt;card&gt;")
+		# 	w.println("      &lt;type&gt;" + card_id + "&lt;/type&gt;")
+		# 	w.println("      &lt;count&gt;" + card_quantity + "&lt;/count&gt;")
+		# 	w.println("    &lt;/card&gt;")
 		# w.println("  &lt;player_id&gt;1&lt;/player_id&gt;")
 		# w.println("  &lt;potion&gt;")
 		# w.println(responseBody)
 		# w.println("  &lt;/potion&gt;")
-		w.println("  &lt;/cards&gt;")
+		w.println("  &lt;/Decks&gt;")
 		w.println(  "</body>")
 		w.println("</response>")
 		

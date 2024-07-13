@@ -38,15 +38,15 @@ def handleInternalEvent(evt):
 	nick = evt.getParam("nick")
 
 	# nick = nick[17:] # remove version info from nick before continuing...
-	importantInfo = nick.split(',')	
+	importantInfo = str(nick).split(',')
 	if len(importantInfo) > 1:
 		nick = importantInfo[0]
 	passw = evt.getParam("pass")
 
 	# Get the secret key of this channel
 	key = _server.getSecretKey(chan)
-	_server.trace("key = " + key)
-	_server.trace("Nick = " + (nick))
+	_server.trace("key = " + str(key))
+	_server.trace("Nick = " + str(nick))
 
 	#_server.trace("evt = " + ' '.join(map(str, dir(evt))) )
 	evtName = evt.getEventName()
@@ -59,12 +59,13 @@ def handleInternalEvent(evt):
 		session_token = None
 		userIP = chan.socket().getInetAddress().getHostAddress()
 		queryRes = None
-		checkSQL = "SELECT * FROM user WHERE username = '" + escapeQuotes(nick) + "' AND MD5(CONCAT('" + key + "', Password)) = '" + escapeQuotes(passw) + "';"
+		checkSQL = "SELECT checkCreds('" + escapeQuotes(nick) + "', '" + escapeQuotes(passw) + "', '" + str(userIP) + "', '" + escapeQuotes(str(key)) + "') AS Result;"
 		UserCheckQueryResult = db.executeQuery(checkSQL)
 		if (UserCheckQueryResult) and (UserCheckQueryResult.size() > 0):
-				queryRes = UserCheckQueryResult
+				queryRes = UserCheckQueryResult.get(0).getItem("Result")
 				row = queryRes.get(0)
 				username = row.getItem("Username")
+				display_name = row.getItem("Nick")
 				playerID = row.getItem("ID")
 				paid = row.getItem("Paid")
 				dbpass = row.getItem("Password")
@@ -81,7 +82,10 @@ def handleInternalEvent(evt):
 					error = "Record insertion failed."
 				else:
 					response["_cmd"] = "logOK"
-					obj = _server.loginUser(nick, dbpass, chan)
+					if display_name is not None:
+						obj = _server.loginUser(display_name, dbpass, chan)
+					else:
+						obj = _server.loginUser(nick, dbpass, chan)
 							#if obj.success == true:
 					_server.trace("Calling getUserByChannel()!")
 					user = _server.getUserByChannel(chan)
@@ -155,7 +159,7 @@ def handlePing(params, who, roomId):
 	#_server.trace("params[0]=" + params[0])
 	cliTime = params[0]         # in milisec
 	srvTime = str(int(round(time.time() ))) # in sec....convert to millisec at client
-	_server.trace("srvTime=" + srvTime)
+	# _server.trace("srvTime=" + srvTime)
 	#response = "ping%-%" + cliTime + "%" + srvTime
 	#response = {}
 	#response["_cmd"] = "ping"

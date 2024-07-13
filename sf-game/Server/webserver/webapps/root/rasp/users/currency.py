@@ -13,7 +13,7 @@ import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper
 ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
-sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
+sys.path.append('sf-game/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
 def escapeQuotes(string):
@@ -63,8 +63,8 @@ class currency(HttpServlet):
 
 
 		# # Get parameters
-		# session_key = None
-		# user = None
+		session_token = None
+		userID = None
 		# ownable_type_id = None
 		# useShards = None
 		# potion_id = None
@@ -72,9 +72,9 @@ class currency(HttpServlet):
 		# hero_name = None
 		# potion_name = None
 
-		# for name in request.getParameterNames():
-		# 	if name == "AS_SESSION_KEY":   # AS_SESSION_KEY
-		# 		session_key = request.getParameter(name)
+		for name in request.getParameterNames():
+			if name == "AS_SESSION_KEY":   # AS_SESSION_KEY
+				session_token = request.getParameter(name)
 		# 	if name == "user_id":   # user ID
 		# 		user = request.getParameter(name)
 		# 	if name == "potion_id":
@@ -84,22 +84,41 @@ class currency(HttpServlet):
 		# 	if name == "request_id":
 		# 		request_id = request.getParameter(name)
 		# #target = 3900009  # temp for testing	
+		if session_token is not None:
+			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
+			tokenQuery = db.executeQuery(getUserID)
+			# userID = None
+			
+			
+			if tokenQuery.size() > 0:
+				userID = tokenQuery[0].getItem("userID")
+
+		sql = "SELECT user.Fractals FROM shso.user user WHERE user.ID = " + escapeQuotes(userID)
+		queryRes = db.executeQuery(sql)
+		if (queryRes == None) or (queryRes.size() == 0):
+			error = "db query failed"
+		if (queryRes and queryRes.size() > 0):
+			for row in queryRes:
+				fractals = row.getItem("Fractals")
+
+
 
 		w = response.getWriter()
 		
 		w.println("<response>")
 		# w.println("  <status>" + responseStatus + "</status>")
-		w.println("  <status>400</status>")
+		# w.println("  <status>400</status>")
+		w.println("  <status>200</status>")
 		w.println("  <headers>")
 		w.println("	<Content-Type>text/html; charset=utf-8</Content-Type>")
 		w.println("  </headers>")
 		w.println("  <body>")
 		w.println("  &lt;currency&gt;")
-		w.println()
+		# w.println()
 		w.println("    &lt;tokens&gt;2&lt;/tokens&gt;")
 		w.println("	&lt;coins&gt;2&lt;/coins&gt;")
 		w.println("	&lt;tickets&gt;2&lt;/tickets&gt;")
-		w.println("	&lt;shards&gt;2&lt;/shards&gt;")
+		w.println("	&lt;shards&gt;" + fractals + "&lt;/shards&gt;")
 		# w.println("  &lt;player_id&gt;1&lt;/player_id&gt;")
 		# w.println("  &lt;potion&gt;")
 		# w.println(responseBody)

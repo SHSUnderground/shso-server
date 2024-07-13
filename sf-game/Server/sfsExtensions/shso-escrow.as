@@ -80,6 +80,22 @@ function destroy()
 }
 
 
+function getUserIdFromSFS(user) {
+
+	// var sql = "select * from active_players where SfUserID =" + _server.escapeQuotes(sfsID) + ";";
+	// queryRes = dbManager.executeQuery(sql);
+	// if (queryRes && queryRes.size() > 0) {
+	// 	return queryRes.get(0).getItem("ShsoUserID");
+	// }
+	var userIDSQL = "SELECT ID from user WHERE Username='" + _server.escapeQuotes(user.getName()) + "' OR Nick = '" + _server.escapeQuotes(user.getName()) + "';";
+		var queryRes = dbManager.executeQuery(userIDSQL);
+		if (queryRes && queryRes.size() > 0) {
+			return queryRes.get(0).getItem("ID");
+		}
+
+}
+
+
 function storeMissionPlayers(userID, missionID) {
 	trace("storeMissionPlayers was called.")
 	if (userID && missionID) {
@@ -88,6 +104,7 @@ function storeMissionPlayers(userID, missionID) {
 				
 		if (success)
 			trace("Mission record inserted!")
+			// trace("Mission record inserted!\n" + sql)
 		else
 			trace("Ouch, mission record insertion failed")
 	}
@@ -95,14 +112,14 @@ function storeMissionPlayers(userID, missionID) {
 
 
 function removeMissionPlayers(userID) {
-	var sql = "DELETE FROM active_missions WHERE UserID = (SELECT ShsoUserID FROM active_players WHERE SfUserID =" + _server.escapeQuotes(userID.toString()) + ");"
-	// trace("Remove from missions sql: " + sql)
-	var success = dbManager.executeCommand(sql);
+	// var sql = "DELETE FROM active_missions WHERE UserID = (SELECT ShsoUserID FROM active_players WHERE SfUserID =" + _server.escapeQuotes(userID.toString()) + ");"
+	// // trace("Remove from missions sql: " + sql)
+	// var success = dbManager.executeCommand(sql);
 				
-		if (success)
-		trace("Record deleted!")
-	else
-		trace("Ouch, record deletion failed")
+	// 	if (success)
+	// 	trace("Mission record deleted!")
+	// else
+	// 	trace("Ouch, record deletion failed")
 }
 
 function handleGetGameRoom(userID, missionID)
@@ -289,7 +306,12 @@ function handleInternalRequest(obj)
 	myText += "	  &lt;server&gt;192.168.235.128:9339&lt;/server&gt;\n"
 	myText += "	  &lt;instance&gt;54181934&lt;/instance&gt;\n"
 	myText += "	  &lt;game&gt;BRAWLER&lt;/game&gt;\n"
-	myText += "	  &lt;allowed_users&gt;" + inviter_id + "," + user + "&lt;/allowed_users&gt;\n"
+	if(parseInt(accept) == 1) {
+			myText += "	  &lt;allowed_users&gt;" + inviter_id + "," + user + "&lt;/allowed_users&gt;\n"
+	}
+	else {
+		myText += "	  &lt;allowed_users&gt;" + inviter_id + "&lt;/allowed_users&gt;\n"
+	}
 	myText += "	  &lt;timestamp&gt;2016-05-16T18:14:20.753392&lt;/timestamp&gt;\n"
 	myText += "	  &lt;code&gt;3e47d6ee069d21ea6cf183f4b726759c5cbd6df83d43c097be4beb0b2c3eaa13&lt;/code&gt;\n"
 	myText += "	&lt;/ticket&gt;&lt;/response&gt;\n"
@@ -316,6 +338,17 @@ function handleInternalRequest(obj)
 	var invitees = String(obj.get(5))
 	trace("get_game_room_invite missionID: " + missionID)
 	handleGetGameRoom(inviter, missionID)
+
+	var invitees_array = invitees.split(",")
+	var friend_invitees = "";
+	for (var index =0; index < invitees_array.length; index++) {
+		var invitee = invitees_array[index]
+		friend_check_sql = "SELECT * FROM shso.friends WHERE playerID IN (" + _server.escapeQuotes(inviter) + ", " + _server.escapeQuotes(invitee) + ") AND FriendID IN (" + _server.escapeQuotes(inviter) + ", " + _server.escapeQuotes(invitee) + ")"
+		var friendQueryRes = dbManager.executeQuery(friend_check_sql)
+		if (friendQueryRes && friendQueryRes.size() == 2) {
+			friend_invitees = friend_invitees + invitee.toString() + ","
+		}
+	}
 	
 	  	// reference to the java package
 	var _util = Packages.java.util
@@ -374,7 +407,7 @@ function handleInternalRequest(obj)
 	myText += "	  &lt;server&gt;192.168.235.128:9339&lt;/server&gt;\n"
 	myText += "	  &lt;instance&gt;54181934&lt;/instance&gt;\n"
 	myText += "	  &lt;game&gt;BRAWLER&lt;/game&gt;\n"
-	myText += "	  &lt;allowed_users&gt;" + inviter + "," + invitees + "&lt;/allowed_users&gt;\n"
+	myText += "	  &lt;allowed_users&gt;" + inviter + "," + friend_invitees + "&lt;/allowed_users&gt;\n"
 	myText += "	  &lt;timestamp&gt;2016-05-16T18:14:20.753392&lt;/timestamp&gt;\n"
 	myText += "	  &lt;code&gt;3e47d6ee069d21ea6cf183f4b726759c5cbd6df83d43c097be4beb0b2c3eaa13&lt;/code&gt;\n"
 	myText += "	&lt;/ticket&gt;&lt;/response&gt;\n"
@@ -541,6 +574,88 @@ function handleInternalRequest(obj)
 
 	  return myList
    }
+
+   if (message.equals("get_game_room_solo_card"))
+   {
+	var missionID = String(obj.get(1))
+	var userID = String(obj.get(2))
+	var arena = String(obj.get(3))
+	var hero = String(obj.get(4))
+	var deck = String(obj.get(5))
+
+	handleGetGameRoom(userID, missionID)
+	
+	  	// reference to the java package
+	var _util = Packages.java.util
+	// Create an ArrayList instance
+	var myList = new _util.ArrayList()
+	// Add one or more items to array list
+	//myList.add("This is cool!")
+	//myList.add((obj.get(1)).toString())
+
+	var myText = "";
+		//myText += bldg.S11.Title + "\n";
+	myText += "<response>\n"
+	myText += "  <status>200</status>\n"
+	myText += "  <headers>\n"
+	myText += "    <Content-Type>text/html; charset=utf-8</Content-Type>\n"
+	myText += "  </headers>\n"
+	myText += "  <body>&lt;response&gt;&lt;invitation&gt;\n"
+	myText += "	  &lt;invitation_id&gt;1103&lt;/invitation_id&gt;\n"
+	myText += "	&lt;/invitation&gt;\n"
+
+	myText += "	&lt;ticket&gt;\n"
+	myText += "	  &lt;player_id&gt;" + userID + "&lt;/player_id&gt;\n"
+	myText += "	  &lt;player_name&gt;RW1wZXJvciBJcmlkZXNjZW50IFdvbGY=&lt;/player_name&gt;\n"
+	myText += "	  &lt;subscriber&gt;1&lt;/subscriber&gt;\n"
+	myText += "	  &lt;session_key&gt;720f98cb79e59f0e6eb2c758915c53978fb0af09d7e5db86edcfd399168bc07c&lt;/session_key&gt;\n"
+	myText += "	  &lt;squad_level&gt;6924&lt;/squad_level&gt;\n"
+	myText += "	  &lt;entitlements&gt;\n"
+	myText += "	    &lt;ArcadeAllow&gt;1&lt;/ArcadeAllow&gt;\n"
+	myText += "	    &lt;CardGameAllow&gt;1&lt;/CardGameAllow&gt;\n"
+	myText += "	    &lt;CatalogCountry&gt;US&lt;/CatalogCountry&gt;\n"
+	myText += "	    &lt;ClientConsoleAllow&gt;0&lt;/ClientConsoleAllow&gt;\n"
+	myText += "	    &lt;DemoLimitsOn&gt;0&lt;/DemoLimitsOn&gt;\n"
+	myText += "	    &lt;Expiration&gt;0&lt;/Expiration&gt;\n"
+	myText += "	    &lt;IsPayingSubscriber&gt;1&lt;/IsPayingSubscriber&gt;\n"
+	myText += "	    &lt;MaxChallengeLevel&gt;65&lt;/MaxChallengeLevel&gt;\n"
+	myText += "	    &lt;OpenChatAllow&gt;1&lt;/OpenChatAllow&gt;\n"
+	myText += "	    &lt;ParentalCardGameDeny&gt;0&lt;/ParentalCardGameDeny&gt;\n"
+	myText += "	    &lt;ParentalFriendingDeny&gt;0&lt;/ParentalFriendingDeny&gt;\n"
+	myText += "	    &lt;ParentalHQDeny&gt;0&lt;/ParentalHQDeny&gt;\n"
+	myText += "	    &lt;ParentalMissionsDeny&gt;0&lt;/ParentalMissionsDeny&gt;\n"
+	myText += "	    &lt;PlayerCountry&gt;US&lt;/PlayerCountry&gt;\n"
+	myText += "	    &lt;PlayerLanguage&gt;en&lt;/PlayerLanguage&gt;\n"
+	myText += "	    &lt;ShieldHQAllow&gt;1&lt;/ShieldHQAllow&gt;\n"
+	myText += "	    &lt;ShieldHeroesAllow&gt;1&lt;/ShieldHeroesAllow&gt;\n"
+	myText += "	    &lt;ShieldPlayAllow&gt;1&lt;/ShieldPlayAllow&gt;\n"
+	myText += "	    &lt;ShieldPrizeWheelAllow&gt;1&lt;/ShieldPrizeWheelAllow&gt;\n"
+	myText += "	    &lt;ShoppingCatalog&gt;1&lt;/ShoppingCatalog&gt;\n"
+	myText += "	    &lt;SubscriptionType&gt;1&lt;/SubscriptionType&gt;\n"
+	myText += "	    &lt;UnityEditorAllow&gt;0&lt;/UnityEditorAllow&gt;\n"
+	myText += "	    &lt;UseExternalShopping&gt;0&lt;/UseExternalShopping&gt;\n"
+	myText += "	    &lt;WIPAllow&gt;0&lt;/WIPAllow&gt;\n"
+	myText += "	  &lt;/entitlements&gt;\n"
+	myText += "	  &lt;created /&gt;\n"
+	myText += "	  &lt;cap&gt;1&lt;/cap&gt;\n"
+	myText += "	  &lt;mission&gt;" + missionID + "&lt;/mission&gt;\n"
+	myText += "	  &lt;server&gt;192.168.235.128:9339&lt;/server&gt;\n"
+	myText += "	  &lt;instance&gt;54181934&lt;/instance&gt;\n"
+	myText += "	  &lt;game&gt;CARD&lt;/game&gt;\n"
+	myText += "	  &lt;my_deck_code&gt;" + deck + "&lt;/my_deck_code&gt;\n"
+	myText += "	  &lt;hero_code&gt;" + hero + "&lt;/hero_code&gt;\n"
+	myText += "	  &lt;allowed_users&gt;" + userID + "&lt;/allowed_users&gt;\n"    // allowed_users = 0 means any users allowed
+	myText += "	  &lt;timestamp&gt;2016-05-16T18:14:20.753392&lt;/timestamp&gt;\n"
+	myText += "	  &lt;code&gt;3e47d6ee069d21ea6cf183f4b726759c5cbd6df83d43c097be4beb0b2c3eaa13&lt;/code&gt;\n"
+	myText += "	&lt;/ticket&gt;&lt;/response&gt;\n"
+
+	myText += "  </body>\n"
+	myText += "</response>\n"
+	myList.add(myText)
+	//myList.add("dummy item");
+
+	  return myList
+   }
    
   
    return "Unrecognized message."
@@ -573,7 +688,7 @@ function handleInternalEvent(evt)
 	
 	//Remove Player from active_players
 	sql = "DELETE FROM active_players WHERE SfUserID=" + _server.escapeQuotes(uid.toString());
-	trace("sql= " + sql);
+	// trace("sql= " + sql);
 	var success = dbManager.executeCommand(sql);
 				
 		if (success)
@@ -681,7 +796,7 @@ function handleHeroCreate(params, user, room)
 
 	///////// write active player info to active_players table in database.  ///////
 	var sql = "INSERT INTO active_players (SfUserID, ShsoUserID, SfRoomID, Hero, BlobText) VALUES(" + _server.escapeQuotes(uid.toString()) + "," + _server.escapeQuotes(shsoID.toString()) + "," + _server.escapeQuotes(curRoom.getId().toString()) + ",'" + _server.escapeQuotes(hero) + "','" + _server.escapeQuotes(blob) + "') ON DUPLICATE KEY UPDATE Hero = '" + _server.escapeQuotes(hero) + "', BlobText = '" + _server.escapeQuotes(blob) + "'";
-	trace("sql= " + sql);
+	// trace("sql= " + sql);
 	var success = dbManager.executeCommand(sql);
 				
 		if (success)
@@ -730,12 +845,27 @@ function handleHeroCreate(params, user, room)
 			// var pvUser = _server.getUserById(parseInt(tempRow.getItem("SfUserID")))
 			var sql = "SELECT * FROM shso.user WHERE id = " + _server.escapeQuotes(tempRow.getItem("ShsoUserID").toString());
 			var queryResName = dbManager.executeQuery(sql);
+			var userID = tempRow.getItem("ShsoUserID");
 			var player_name = queryResName.get(0).getItem("Username").toString();
+			var squadlvlsql = "select CalculateSquadLevel(" + _server.escapeQuotes(userID) + ") AS `squadlevel`";
+			var lvlsql = "select GETLVL((SELECT XP from shso.heroes WHERE UserID = " + _server.escapeQuotes(userID) + " AND name = (SELECT hero_name from shso.equips WHERE UserID = " + _server.escapeQuotes(userID) + "))) AS `hero_level`";
+			var squad_level = 0;
+			var hero_level = 0;
+			var lvlQueryRes = dbManager.executeQuery(lvlsql);
+			var squadlvlQueryRes = dbManager.executeQuery(squadlvlsql);
+			if (lvlQueryRes && lvlQueryRes.size() > 0) {
+				hero_level = lvlQueryRes.get(0).getItem("hero_level");
+			}
+			if (squadlvlQueryRes && squadlvlQueryRes.size() > 0) {
+				squad_level = squadlvlQueryRes.get(0).getItem("squadlevel");
+			}
 
 			res = []
 			res[0] = "playerVars"
-			res[1] = tempRow.getItem("SfUserID").toString() + "|" + tempRow.getItem("ShsoUserID").toString() + "|" + player_name + "|true|1|1"
-			//trace("Res[1]: " + res[1]);
+			// res[1] = tempRow.getItem("SfUserID").toString() + "|" + tempRow.getItem("ShsoUserID").toString() + "|" + player_name + "|true|1|1"
+			res[1] = tempRow.getItem("SfUserID").toString() + "|" + tempRow.getItem("ShsoUserID").toString() + "|" + player_name + "|" + (user.isModerator == true ? "True" : "False") + "|" + hero_level + "|" + squad_level;
+			// res[1] = tempRow.getItem("SfUserID").toString() + "|" + tempRow.getItem("ShsoUserID").toString() + "|" + player_name + "|" + (player_name == "Titan" ? "True" : "False") + "|" + hero_level + "|" + squad_level;
+			// trace("Res[1]: " + res[1]);
 			//_server.sendResponse(res, -1, null, [user], "str")
 			_server.sendResponse(res, -1, null, users, "str")
 			// i++;

@@ -13,7 +13,7 @@ import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper
 ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
-sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
+sys.path.append('sf-game/Server/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
 def escapeQuotes(string):
@@ -62,28 +62,24 @@ class counters(HttpServlet):
 		#targetExtension = zone.getExtension("escrow");
 
 
-		# # Get parameters
-		# session_key = None
-		# user = None
-		# ownable_type_id = None
-		# useShards = None
-		# potion_id = None
-		# request_id = None
-		# hero_name = None
-		# potion_name = None
-
-		# for name in request.getParameterNames():
-		# 	if name == "AS_SESSION_KEY":   # AS_SESSION_KEY
-		# 		session_key = request.getParameter(name)
-		# 	if name == "user_id":   # user ID
-		# 		user = request.getParameter(name)
-		# 	if name == "potion_id":
-		# 		ownable_type_id = request.getParameter(name)
-		# 	if name == "hero_name":
-		# 		hero_name = request.getParameter(name)
-		# 	if name == "request_id":
-		# 		request_id = request.getParameter(name)
-		# #target = 3900009  # temp for testing	
+		userID = None
+		session_token = None
+		#userID = "3870526"   # this line for doGet testing only !!!!!!!!!!!!!!!
+		for name in request.getParameterNames():
+			# if (name == "user"):
+				# userID = request.getParameter(name)
+			# if (name == "user_id"):
+				# userID = request.getParameter(name)
+			if (name == "AS_SESSION_KEY"):
+				session_token = request.getParameter(name)
+		if session_token is not None:
+			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
+			tokenQuery = db.executeQuery(getUserID)
+			# userID = None
+			
+			
+			if tokenQuery.size() > 0:
+				userID = tokenQuery[0].getItem("userID")
 
 
 		# countersSQL = "SELECT * from shso.counters;"
@@ -104,8 +100,8 @@ class counters(HttpServlet):
 		# 		responseBody += "\n&lt;/value&gt;"
 		# 		responseBody += "\n&lt;/counter&gt;"
 		# 	responseBody += "\n&lt;/counters&gt;"
-
-
+		countersSQL = "SELECT * FROM shso.counters WHERE userID = " + escapeQuotes(userID) + ";"
+		countersQueryResult = db.executeQuery(countersSQL)
 		w = response.getWriter()
 
 		w.println("<response>")
@@ -116,10 +112,22 @@ class counters(HttpServlet):
 		w.println("  </headers>")
 		w.println("  <body>")
 		# w.println(responseBody)
-		counters_file = open('sf-game/Server/webserver/webapps/root/rasp/users/counters.xml', 'r')
-		for line in counters_file.readlines():
-			w.println(line)
-		counters_file.close()
+		w.println("&lt;counters&gt;")
+		# counters_file = open('sf-game/Server/webserver/webapps/root/rasp/users/counters_static.xml', 'r')
+		# for line in counters_file.readlines():
+		# 	w.println(line)
+		# counters_file.close()
+		if (countersQueryResult.size() > 0):
+			for row in countersQueryResult:
+				counter_name = row.getItem("hero")
+				counter_type = row.getItem("ID")
+				counter_value = row.getItem("value")
+				w.println("  &lt;counter&gt;")
+				w.println("    &lt;hero_name&gt;" + str(counter_name) + "&lt;/hero_name&gt;")
+				w.println("    &lt;counter_type&gt;" + str(counter_type) + "&lt;/counter_type&gt;")
+				w.println("    &lt;value&gt;" + str(counter_value) + "&lt;/value&gt;")
+				w.println("  &lt;/counter&gt;")
+		w.println("&lt;/counters&gt;")
 		w.println(  "</body>")
 		w.println("</response>")
 		

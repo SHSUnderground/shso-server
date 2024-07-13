@@ -12,7 +12,7 @@ import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper
 ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
-sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
+sys.path.append('sf-game/Server/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
 class gettoken(HttpServlet):
@@ -85,7 +85,7 @@ class gettoken(HttpServlet):
 		w.println("    <Content-Type>application/json; charset=UTF-8</Content-Type>")
 		w.println("  </headers>")
 		w.println("  <body>")
-		# hero_lore_bonus_file = open('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/rasp/data/json/hero_lore_bonus.json', 'r')
+		# hero_lore_bonus_file = open('sf-game/Server/Server/webserver/webapps/root/rasp/data/json/hero_lore_bonus.json', 'r')
 		# for line in hero_lore_bonus_file.readlines():
 		# 	w.println(line)
 		# hero_lore_bonus_file.close()

@@ -4,8 +4,8 @@
     <Content-Type>application/xml; charset=UTF-8</Content-Type>
   </headers>
   <body>&lt;ticket&gt;
-  &lt;player_id&gt;1675&lt;/player_id&gt;
-  &lt;player_name&gt;sirBadDoggo&lt;/player_name&gt;
+  &lt;player_id&gt;3870526&lt;/player_id&gt;
+  &lt;player_name&gt;RW1wZXJvciBJcmlkZXNjZW50IFdvbGY=&lt;/player_name&gt;
   &lt;subscriber&gt;1&lt;/subscriber&gt;
   &lt;session_key&gt;720f98cb79e59f0e6eb2c758915c53978fb0af09d7e5db86edcfd399168bc07c&lt;/session_key&gt;
   &lt;squad_level&gt;6924&lt;/squad_level&gt;
@@ -37,12 +37,11 @@
   &lt;/entitlements&gt;
   &lt;created /&gt;
   &lt;cap&gt;1&lt;/cap&gt;
-  &lt;csp&gt;csp-added-MAYHEM&lt;/csp&gt;
-  &lt;mission&gt;m_100X_1_Sabretooth001&lt;/mission&gt;
-  &lt;server&gt;217.160.145.95:9339&lt;/server&gt;
+  &lt;mission&gt;m_100M_22_Mysterio001&lt;/mission&gt;
+  &lt;server&gt;199.30.202.33:9389&lt;/server&gt;
   &lt;instance&gt;54181934&lt;/instance&gt;
   &lt;game&gt;BRAWLER&lt;/game&gt;
-  &lt;allowed_users&gt;1675&lt;/allowed_users&gt;
+  &lt;allowed_users&gt;3870526&lt;/allowed_users&gt;
   &lt;timestamp&gt;2016-05-16T18:14:20.753392&lt;/timestamp&gt;
   &lt;code&gt;3e47d6ee069d21ea6cf183f4b726759c5cbd6df83d43c097be4beb0b2c3eaa13&lt;/code&gt;
 &lt;/ticket&gt;

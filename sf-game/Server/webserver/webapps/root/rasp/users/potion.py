@@ -13,7 +13,7 @@ import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper
 ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
-sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
+sys.path.append('sf-game/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
 def escapeQuotes(string):
@@ -128,7 +128,7 @@ class potion(HttpServlet):
 		error = ""
 		fractals = -1
 		quantity = 0
-		sql = "SELECT quantity FROM shso.inventory WHERE UserID = " + escapeQuotes(str(playerID)) + " AND type = " + escapeQuotes(str(ownable_type_id)) 
+		sql = "SELECT quantity FROM shso.inventory WHERE UserID = " + escapeQuotes(str(playerID)) + " AND type = " + escapeQuotes(str(ownable_type_id))
 		queryRes = db.executeQuery(sql)
 		if (queryRes == None) or (queryRes.size() == 0):
 			error = "db query failed"

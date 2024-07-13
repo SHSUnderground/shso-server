@@ -22,7 +22,7 @@ def escapeQuotes(string):
 	string2 = string2.replace("\\", "\\\\")
 	return string2
 
-class cards(HttpServlet):
+class get_high_scores(HttpServlet):
 
 	def __init__(self):
 		self.htmlHead = "<html><head></head><body style='font-family:Verdana'>"
@@ -63,39 +63,23 @@ class cards(HttpServlet):
 
 
 		# # Get parameters
-		# session_key = None
-		# user = None
-		# ownable_type_id = None
-		# useShards = None
-		# potion_id = None
-		# request_id = None
-		# hero_name = None
-		# potion_name = None
-
-		# for name in request.getParameterNames():
-		# 	if name == "AS_SESSION_KEY":   # AS_SESSION_KEY
-		# 		session_key = request.getParameter(name)
-		# 	if name == "user_id":   # user ID
-		# 		user = request.getParameter(name)
-		# 	if name == "potion_id":
-		# 		ownable_type_id = request.getParameter(name)
-		# 	if name == "hero_name":
-		# 		hero_name = request.getParameter(name)
-		# 	if name == "request_id":
-		# 		request_id = request.getParameter(name)
-		# #target = 3900009  # temp for testing	
-
-		userID = None
 		session_token = None
-		#userID = "3870526"   # this line for doGet testing only !!!!!!!!!!!!!!!
+		userID = None
+		hero_id = None
+		is_multiplayer_score = None
+		mission_id = None
 		for name in request.getParameterNames():
-			# if (name == "user"):
-				# userID = request.getParameter(name)
-			# if (name == "user_id"):
-				# userID = request.getParameter(name)
-			if (name == "AS_SESSION_KEY"):
+			if name == "AS_SESSION_KEY":   # AS_SESSION_KEY
 				session_token = request.getParameter(name)
-
+			if name == "hero_id":
+				hero_id = request.getParameter(name)
+			if name == "mission_id":
+				mission_id = request.getParameter(name)
+			if name == "is_multiplayer_score":
+				is_multiplayer_score = len(request.getParameterValues("is_multiplayer_score")) - 1
+				# if is_multiplayer_score is not None: # Because it is duplicated in sent form data.
+				# else:
+				# 	is_multiplayer_score = request.getParameter(name)
 		if session_token is not None:
 			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
 			tokenQuery = db.executeQuery(getUserID)
@@ -104,16 +88,8 @@ class cards(HttpServlet):
 			
 			if tokenQuery.size() > 0:
 				userID = tokenQuery[0].getItem("userID")
-
-		cardInventorySQL = "SELECT * FROM shso.inventory WHERE category = 'card' AND shso.inventory.UserID = " + escapeQuotes(userID)
-
-
-		queryRes2 = db.executeQuery(cardInventorySQL)
-		if (queryRes2 == None) or (queryRes2.size() == 0):
-			error = "db query failed"
-
+		
 		w = response.getWriter()
-
 		w.println("<response>")
 		# w.println("  <status>" + responseStatus + "</status>")
 		w.println("  <status>200</status>")
@@ -121,30 +97,35 @@ class cards(HttpServlet):
 		w.println("	<Content-Type>text/html; charset=utf-8</Content-Type>")
 		w.println("  </headers>")
 		w.println("  <body>")
-		w.println("  &lt;cards&gt;")
-		cardsstr = "ST005:1;ST038:1;ST047:2;ST048:4;ST105:1;ST142:4;ST148:2;ST150:4;ST165:4;ST172:4;ST183:4;ST187:4;ST194:1;ST272:1;ST353:3"
-		cardsstr = cardsstr.split(";")
-		if userID == '53':
-			for card in cardsstr:
-				card = card.split(":")
-				card_id = card[0]
-				card_quantity = card[1]
-				w.println("    &lt;card&gt;")
-				w.println("      &lt;type&gt;" + card_id + "&lt;/type&gt;")
-				w.println("      &lt;count&gt;" + card_quantity + "&lt;/count&gt;")
-				w.println("    &lt;/card&gt;")
-		for row in queryRes2:
-			card_id = row.getItem("type")
-			card_quantity = row.getItem("quantity")
-			w.println("    &lt;card&gt;")
-			w.println("      &lt;type&gt;" + card_id + "&lt;/type&gt;")
-			w.println("      &lt;count&gt;" + card_quantity + "&lt;/count&gt;")
-			w.println("    &lt;/card&gt;")
-		# w.println("  &lt;player_id&gt;1&lt;/player_id&gt;")
-		# w.println("  &lt;potion&gt;")
-		# w.println(responseBody)
-		# w.println("  &lt;/potion&gt;")
-		w.println("  &lt;/cards&gt;")
+		leaderboardSQL = "SELECT shso.LeaderboardInfo.* FROM shso.LeaderboardInfo where MONTH(shso.LeaderboardInfo.timestamp) = MONTH(CURRENT_TIMESTAMP) AND YEAR(shso.LeaderboardInfo.timestamp) = YEAR(CURRENT_TIMESTAMP) AND shso.LeaderboardInfo.MissionID = " + escapeQuotes(mission_id) + " AND Multiplayer = " + escapeQuotes(is_multiplayer_score)
+		if int(hero_id) != 0:
+			leaderboardSQL += " AND Hero = " + escapeQuotes(hero_id)
+		leaderboardSQL += " ORDER BY avg_group_score_rounded DESC;"
+		leaderboardRes = db.executeQuery(leaderboardSQL)
+		# if int(userID) == 53:
+		# 	w.println("&lt;leadersql&gt;")
+		# 	w.println(leaderboardSQL)
+		# 	w.println("&lt;/leadersql&gt;")
+		w.println("&lt;scores&gt;")
+		w.println("&lt;leaders&gt;")
+		rank = 1
+		if leaderboardRes and leaderboardRes.size() > 0:
+			for row in leaderboardRes:
+				hero = row.getItem("Hero")
+				score = row.getItem("avg_group_score_rounded")
+				player = row.getItem("Username")
+				w.println("&lt;leader&gt;")
+				w.println("&lt;rank&gt;" + str(rank) + "&lt;/rank&gt;")
+				w.println("&lt;player&gt;" + str(player) + "&lt;/player&gt;")
+				w.println("&lt;hero&gt;" + str(hero) + "&lt;/hero&gt;")
+				w.println("&lt;score&gt;" + str(score) + "&lt;/score&gt;")
+				w.println("&lt;/leader&gt;")
+				rank += 1
+		# if mission_classes[mission_id] != 'Survival':
+		# 	mission_reward = missionTypeRewards[mission_classes[mission_id]]
+			# w.println("mission_ID: " + str(mission_id) + " mission class: " + str(mission_classes[mission_id]) + " missionTypeRewards: " + str(missionTypeRewards[mission_classes[mission_id]]))
+		w.println("&lt;/leaders&gt;")
+		w.println("&lt;/scores&gt;")
 		w.println(  "</body>")
 		w.println("</response>")
 		

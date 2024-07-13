@@ -12,7 +12,7 @@ import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper
 ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
-sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
+sys.path.append('sf-game/Server/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
 def escapeQuotes(string):
@@ -31,7 +31,7 @@ class counters_set(HttpServlet):
 	#
 	# Handle GET requests  (this gets called from browser)
 	#
-	def doPost(self, request, response):	
+	def doGet(self, request, response):	
 		
 
 
@@ -41,7 +41,7 @@ class counters_set(HttpServlet):
 	#
 	# Handle POST requests (the client app is doing a POST request to anyone.py)
 	#
-	def doGet(self, request, response):
+	def doPost(self, request, response):
 		if (pylibcsp.ipcheck(False)):   # don't process request if not a valid client
 			return
 		
@@ -55,43 +55,57 @@ class counters_set(HttpServlet):
 		# Get a reference to database manager
 		db = zone.dbManager;
 
-		# userID = None
-		# session_token = None
-		# #userID = "3870526"   # this line for doPost testing only !!!!!!!!!!!!!!!
-		# for name in request.getParameterNames():
-		# 	# if (name == "user"):
-		# 		# userID = request.getParameter(name)
-		# 	# if (name == "user_id"):
-		# 		# userID = request.getParameter(name)
-		# 	if (name == "AS_SESSION_KEY"):
-		# 		session_token = request.getParameter(name)
-
-		# if session_token is not None:
-		# 	getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
-		# 	tokenQuery = db.executeQuery(getUserID)
-		# 	# userID = None
+		userID = None
+		session_token = None
+		counter_name = None
+		counter_type = None
+		counter_value = None
+		#userID = "3870526"   # this line for doGet testing only !!!!!!!!!!!!!!!
+		for name in request.getParameterNames():
+			# if (name == "user"):
+				# userID = request.getParameter(name)
+			# if (name == "user_id"):
+				# userID = request.getParameter(name)
+			if (name == "AS_SESSION_KEY"):
+				session_token = request.getParameter(name)
+			elif (name == "hero_name"):
+				hero_name = request.getParameter(name)
+			elif (name == "counter"):
+				counter_id = request.getParameter(name)
+			elif (name == "amount"):
+				difference_amount = request.getParameter(name)
+		if session_token is not None:
+			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
+			tokenQuery = db.executeQuery(getUserID)
+			# userID = None
 			
 			
-		# 	if tokenQuery.size() > 0:
-		# 		userID = tokenQuery[0].getItem("userID")
+			if tokenQuery.size() > 0:
+				userID = tokenQuery[0].getItem("userID")
 
 		# # Update/Insert db record for this player
 		# error = ""
 		# sql = "INSERT INTO shso.equips (UserID, sidekick_id) values (" + userID + ", '" + sidekick_id + "') ON DUPLICATE KEY UPDATE sidekick_id = " + sidekick_id
-
-		# success = db.executeCommand(sql)
-		# if (not success):
-		# 	error = "db query failed"
-									
+		# sql = "INSERT INTO shso.counters VALUES(%s, %s, %s, '%s') ON DUPLICATE KEY UPDATE value=;" % (escapeQuotes(userID), escapeQuotes(counter_name), escapeQuotes(counter_type), escapeQuotes(counter_value))
+		sql = "UPDATE shso.counters SET value = value + %i WHERE userID = %s AND ID = %s AND hero = '%s';" % (int(difference_amount), counter_id, userID, hero_name)
+		success = db.executeCommand(sql)
+		success = False
+		if (not success):
+			error = "db query failed"
 		w = response.getWriter()
 
 		w.println("<response>")
-		w.println("  <status>200</status>")
+		if success:
+			w.println("  <status>200</status>")
+		else:
+			w.println("  <status>404</status>")
+		# if userID == '53':
+		# 	w.println(sql)
 		w.println("  <headers>")
 		w.println("    <Content-Type>application/json; charset=UTF-8</Content-Type>")
 		w.println("  </headers>")
 		w.println("  <body>")
-		# brawler_missions_file = open('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/rasp/data/json/brawler-missions', 'r')
+		# brawler_missions_file = open('sf-game/Server/Server/webserver/webapps/root/rasp/data/json/brawler-missions', 'r')
 		# for line in brawler_missions_file.readlines():
 		# 	w.println(line)
 		# ach_file.close()

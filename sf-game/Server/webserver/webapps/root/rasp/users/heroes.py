@@ -15,7 +15,15 @@ ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 sys.path.append('sf-game/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
-class squad(HttpServlet):
+
+def escapeQuotes(string):
+	string2 = str(string).replace( '"', '\"')
+	string2 = string2.replace( "'", "\'")
+	string2 = string2.replace("\\", "\\\\")
+	return string2
+
+
+class heroes(HttpServlet):
 
 	def __init__(self):
 		self.htmlHead = "<html><head></head><body style='font-family:Verdana'>"
@@ -59,7 +67,7 @@ class squad(HttpServlet):
 	
 		
 		if session_token is not None:
-			getUserID = "SELECT * from tokens WHERE token='" + session_token + "'"
+			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
 			tokenQuery = db.executeQuery(getUserID)
 			# userID = None
 			
@@ -81,7 +89,7 @@ class squad(HttpServlet):
 		error = ""
 		usersStr = ""
 		fractals = -1
-		sql = "SELECT user.* FROM shso.user user WHERE user.ID = " + userID
+		sql = "SELECT user.* FROM shso.user user WHERE user.ID = " + escapeQuotes(userID)
 
 		queryRes = db.executeQuery(sql)
 		if (queryRes == None) or (queryRes.size() == 0):
@@ -97,7 +105,7 @@ class squad(HttpServlet):
 		# Get all owned characters for this player
 		error = ""
 		usersStr = ""
-		sql = "SELECT heroes.* FROM shso.heroes, shso.user WHERE heroes.UserID = user.ID AND user.ID = " + userID
+		sql = "SELECT heroes.* FROM shso.heroes, shso.user WHERE heroes.UserID = user.ID AND user.ID = " + escapeQuotes(userID)
 
 
 		queryRes2 = db.executeQuery(sql)
@@ -128,7 +136,7 @@ class squad(HttpServlet):
 
 		w = response.getWriter()
 
-		lastUsedHeroSQL = "SELECT * FROM shso.equips WHERE UserID = " + userID
+		lastUsedHeroSQL = "SELECT * FROM shso.equips WHERE UserID = " + escapeQuotes(userID)
 		# lastUsedHeroSQL = "SELECT hero FROM shso.equips WHERE userid = " + userID
 		lastUsedQueryRes = db.executeQuery(lastUsedHeroSQL)
 		last_used_hero = 'iron_man'
@@ -148,33 +156,13 @@ class squad(HttpServlet):
 		w.println("<response>")
 		w.println("  <status>200</status>")
 		w.println("  <headers>")
-		w.println("    <Content-Type>application/json; charset=UTF-8</Content-Type>")
+		w.println("    <Content-Type>application/xml; charset=UTF-8</Content-Type>")
 		w.println("  </headers>")
-		w.println("  <body>{")
-		w.println('"id:"' + userID + ",")
-		w.println('"player_name"' + username + ",")
-		# w.println("  created:2012-09-16 01:17:50:)
-		# w.println("  consecutive_days:45:)
-		# w.println("  logins_today:5:)
-		# w.println("  squad_level:" + str(squadlevel) :)
-		w.println('"last_celebrated:"' + "65" + ",")
-		w.println('"current_challenge:"' + "66" + ",")
-		w.println('"tracker_data:"' + "0,525043,414418,511843" + ",")
-		w.println('"medallion_id:"' + str(last_used_medallion) + ",")
-		w.println('"title_id:"' + str(last_used_title) + ",")
-		w.println('"sidekick_id:"' + str(last_used_sidekick) + ",")
-		w.println('"sidekick_tier:"' + "2" + ",")
-		w.println('"achievement_points:"' + "26050" + ",")
-		w.println('"current_costume:"' + str(last_used_hero) + ",")
-		# w.println("extended_data:LastCostume:" + last_used_hero + "/LastCostume:LastDeckID:4791457/LastDeckID:FirstCardGame:false/FirstCardGame:DemoHack:false/DemoHack::)
-		
-		
-		# w.println("      value:424999,414586,376099,350432:)
-		w.println('"heroes:"{')
+		w.println("  <body>")
+		w.println("  &lt;heroes&gt;")
 
 
 		# loop thru owned characters
-
 		if (queryRes2.size() > 0):
 			for row in queryRes2:
 				heroname = row.getItem("Name")
@@ -182,26 +170,29 @@ class squad(HttpServlet):
 				tier = row.getItem("Tier")
 				code = row.getItem("Code")
 
-				w.println("{")
-				w.println('"name:"' + heroname + ",")
-				w.println('"xp:"' + str(xp) + ",")
-				w.println('"tier:"' + str(tier) + ",")
-				w.println('"code:"' + code + ",")
-				w.println("}")
+				w.println("        &lt;hero&gt;")
+				w.println("          &lt;name&gt;" + str(heroname) + "&lt;/name&gt;")
+				w.println("          &lt;xp&gt;" + str(xp) + "&lt;/xp&gt;")
+				w.println("          &lt;tier&gt;" + str(tier) + "&lt;/tier&gt;")
+				w.println("          &lt;code&gt;" + str(code) + "&lt;/code&gt;")
+				w.println("        &lt;/hero&gt;")
 
-
-		w.println("}")
-		# w.println("  currency:")
-		# w.println("    tokens:0:)
-		# w.println("    coins:32:)
-		# w.println("    tickets:20:)
-		# w.println("    shards:" + fractals :)
-		# w.println("  :)
-		# w.println("  prize_wheel:")
-		# w.println("    earned_stops:0:)
-		# w.println("  :)
-		# w.println(":)
-		w.println("}</body>")
+		reskins_sql = "select reskin_name, heroes.xp, heroes.tier, heroes.code from reskins, heroes where LOCATE(name, reskin_name) != 0 AND UserID = " + escapeQuotes(userID)
+		reskinsRes = db.executeQuery(reskins_sql)
+		if reskinsRes is not None and reskinsRes.size() > 0:
+			for reskin_row in reskinsRes:
+				heroname = reskin_row.getItem("reskin_name")
+				xp = reskin_row.getItem("Xp")
+				tier = reskin_row.getItem("Tier")
+				code = 'Reskin'
+				w.println("        &lt;hero&gt;")
+				w.println("          &lt;name&gt;" + str(heroname) + "&lt;/name&gt;")
+				w.println("          &lt;xp&gt;" + str(xp) + "&lt;/xp&gt;")
+				w.println("          &lt;tier&gt;" + str(tier) + "&lt;/tier&gt;")
+				w.println("          &lt;code&gt;" + str(code) + "&lt;/code&gt;")
+				w.println("        &lt;/hero&gt;")
+		w.println("  &lt;/heroes&gt;")
+		w.println("</body>")
 		w.println("</response>")
 		
 

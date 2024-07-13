@@ -12,7 +12,7 @@ import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper
 ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
-sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
+sys.path.append('sf-game/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp
 
 
@@ -138,11 +138,11 @@ class purchase(HttpServlet):
 			sql = ""
 			if category == "h":
 				sql = "INSERT INTO shso.heroes (UserID, Name) SELECT " + playerID + ", name FROM catalog WHERE catalog_ownable_id = " + catalog_ownable_id + ";"
-			elif category not in ["badge", "craft", "sidekick"]:
+			elif category not in ["badge", "craft", "bundle"]:
 				sql = "INSERT INTO shso.inventory (UserID, type, category, subscriber_only) SELECT " + playerID + ", ownable_type_id, category, subscriber_only FROM catalog WHERE catalog_ownable_id = " + catalog_ownable_id + " ON DUPLICATE KEY UPDATE shso.inventory.quantity=shso.inventory.quantity+1;"
 			else:
 				responseStatus = "400"
-				responseBody = "Sidekick, badge, and craft purchases are disabled at this time."
+				responseBody = "Bundle, Badge, and craft purchases are disabled at this time."
 	
 			# if category != "h":
 			# 	sql = "INSERT INTO shso.inventory (UserID, type, category, subscriber_only) SELECT " + playerID + ", ownable_type_id, category, subscriber_only FROM catalog WHERE catalog_ownable_id = " + catalog_ownable_id + " ON DUPLICATE KEY UPDATE quantity=quantity+1;"

@@ -12,7 +12,7 @@ import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper
 ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
-sys.path.append('sf-game/Server/Server/webserver/webapps/root/pylibcsp')
+sys.path.append('sf-game/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
 class purchase_item(HttpServlet):
@@ -90,25 +90,22 @@ class purchase_item(HttpServlet):
 
 		# LOOK UP PRICE OF ITEM IN CATALOG
 		error = ""
-		shard_price = 999999
+                shard_price = 999999
 		category = " "
-		sql = "SELECT shard_price, category, price_multiplier FROM shso.catalog WHERE catalog_ownable_id = " + catalog_ownable_id;
+		sql = "SELECT shard_price, category FROM shso.catalog WHERE catalog_ownable_id = " + catalog_ownable_id;
 		queryRes = db.executeQuery(sql)
 		if (queryRes == None) or (queryRes.size() == 0):
 			error = "db query failed"
 		else:
 			for row in queryRes:
-				shard_price = float(row.getItem("shard_price"))
-				multiplier = float(row.getItem("price_multiplier"))
-				shard_price *= multiplier
-				shard_price = int(round(shard_price))
+				shard_price = int(row.getItem("shard_price"))
 				category = row.getItem("category")
 
 
 		### CHECK IF PLAYER HAS ENOUGH FUNDS TO COMPLETE THE PURCHASE
 		error = ""
 		fractals = -1
-		sql = "SELECT Fractals FROM shso.user WHERE Paid = 1 AND ID = " + playerID;
+		sql = "SELECT Fractals FROM shso.user WHERE ID = " + playerID;
 		queryRes = db.executeQuery(sql)
 		if (queryRes == None) or (queryRes.size() == 0):
 			error = "db query failed"

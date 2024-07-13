@@ -12,9 +12,17 @@ import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper
 ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
-sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
+sys.path.append('sf-game/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
+import datetime
 
+current_time = datetime.datetime.now()
+midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+time_until_midnight = midnight - current_time
+hours_until_midnight = time_until_midnight.seconds // 3600
+minutes_until_midnight = (time_until_midnight.seconds // 60) % 60
+seconds_until_midnight = time_until_midnight.seconds % 60
+time_until_midnight = str(hours_until_midnight) + ":" + str(minutes_until_midnight) + ":" + str(seconds_until_midnight)
 
 def escapeQuotes(string):
 	string2 = str(string).replace( '"', '\"')
@@ -77,7 +85,7 @@ class user(HttpServlet):
 			# userID = 
 	
 		# fileList = ["POST Request Recieved"]
-        # outfile = open("sf-game/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
+        # outfile = open("/sf-game/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
         # outfile.writelines(fileList)
 
 		# Get a reference to the Extension we want to call 
@@ -99,6 +107,7 @@ class user(HttpServlet):
 		if (queryRes.size() > 0):
 			for row in queryRes:
 				username = row.getItem("Username")
+				display_name = row.getItem("Nick")
 				fractals = row.getItem("Fractals")
 									
 
@@ -152,7 +161,6 @@ class user(HttpServlet):
 				last_used_medallion = str(lastUsedQueryRes[0].getItem("medallion_id"))
 			if(lastUsedQueryRes[0].getItem("sidekick_id") is not None):
 				last_used_sidekick = str(lastUsedQueryRes[0].getItem("sidekick_id"))
-
 		w.println("<response>")
 		w.println("  <status>200</status>")
 		w.println("  <headers>")
@@ -160,7 +168,10 @@ class user(HttpServlet):
 		w.println("  </headers>")
 		w.println("  <body>&lt;profile&gt;")
 		w.println("  &lt;id&gt;" + str(userID) + "&lt;/id&gt;")
-		w.println("  &lt;player_name&gt;" + str(username) + "&lt;/player_name&gt;")
+		if display_name is not None:
+			w.println("  &lt;player_name&gt;" + str(display_name) + "&lt;/player_name&gt;")
+		else:
+			w.println("  &lt;player_name&gt;" + str(username) + "&lt;/player_name&gt;")
 		w.println("  &lt;created&gt;2012-09-16 01:17:50&lt;/created&gt;")
 		w.println("  &lt;consecutive_days&gt;45&lt;/consecutive_days&gt;")
 		w.println("  &lt;logins_today&gt;5&lt;/logins_today&gt;")
@@ -168,6 +179,7 @@ class user(HttpServlet):
 		w.println("  &lt;last_celebrated&gt;65&lt;/last_celebrated&gt;")
 		w.println("  &lt;current_challenge&gt;66&lt;/current_challenge&gt;")
 		w.println("  &lt;tracker_data&gt;0,525043,414418,511843&lt;/tracker_data&gt;")
+		# w.println("  &lt;tracker_data&gt;&lt;/tracker_data&gt;")
 		w.println("  &lt;medallion_id&gt;" + str(last_used_medallion) + "&lt;/medallion_id&gt;")
 		w.println("  &lt;title_id&gt;" + str(last_used_title) + "&lt;/title_id&gt;")
 		w.println("  &lt;sidekick_id&gt;" + str(last_used_sidekick) + "&lt;/sidekick_id&gt;")
@@ -175,7 +187,7 @@ class user(HttpServlet):
 		w.println("  &lt;achievement_points&gt;26050&lt;/achievement_points&gt;")
 		w.println("  &lt;current_costume&gt;" + str(last_used_hero) + "&lt;/current_costume&gt;")
 		w.println("  &lt;tracker_data&gt;0,525043,414418,511843&lt;/tracker_data&gt;")
-		w.println("  &lt;time_til_midnight&gt;08:47&lt;/time_til_midnight&gt;")
+		w.println("  &lt;time_til_midnight&gt;" + time_until_midnight + "&lt;/time_til_midnight&gt;")
 		w.println("  &lt;extended_data&gt;&lt;LastCostume&gt;" + str(last_used_hero) + "&lt;/LastCostume&gt;&lt;LastDeckID&gt;4791457&lt;/LastDeckID&gt;&lt;FirstCardGame&gt;false&lt;/FirstCardGame&gt;&lt;DemoHack&gt;false&lt;/DemoHack&gt;&lt;/extended_data&gt;")
 		w.println("  &lt;entitlements&gt;")
 		w.println("    &lt;entitlement code=\"6d84fe391a92aa30eef19bf474f6ab6793be25ff2af44cd4935f46bda3365af1\" name=\"PlayerCountry\" value=\"US\" /&gt;")
@@ -193,7 +205,10 @@ class user(HttpServlet):
 		w.println("    &lt;entitlement code=\"1c3520f25dc5afb53cccf58778da8287ae29233cb1943ddd064c722a6faaefdf\" name=\"WIPAllow\" value=\"False\" /&gt;")
 		w.println("    &lt;entitlement code=\"0eb50bddecb277d95a3dbfe9b2c1a84ad64b4b57cd8c8c47e448820d8f2df5b9\" name=\"ArcadeAllow\" value=\"True\" /&gt;")
 		w.println("    &lt;entitlement code=\"682f82aea1ec79f78d588c70b9dfb90a334b06e7e1b8e64f0b3ff7d8b4f77eef\" name=\"ParentalCardGameDeny\" value=\"False\" /&gt;")
-		w.println("    &lt;entitlement code=\"73acbb6669de525c784c99c033f5c1c61cb48cd799c4ea81dcbf351dd44ad9d6\" name=\"ClientConsoleAllow\" value=\"False\" /&gt;")
+		if username.lower() == "titan":
+			w.println("    &lt;entitlement code=\"73acbb6669de525c784c99c033f5c1c61cb48cd799c4ea81dcbf351dd44ad9d6\" name=\"ClientConsoleAllow\" value=\"True\" /&gt;")
+		else:
+			w.println("    &lt;entitlement code=\"73acbb6669de525c784c99c033f5c1c61cb48cd799c4ea81dcbf351dd44ad9d6\" name=\"ClientConsoleAllow\" value=\"False\" /&gt;")
 		w.println("    &lt;entitlement code=\"6d6862354a6aa60178f17fbefed2f99c7dce13a2ea0af2a921943f4e008f7c9a\" name=\"ShieldPlayAllow\" value=\"True\" /&gt;")
 		w.println("    &lt;entitlement code=\"b309cf1388fd03e7a66fcb5f77e0ef94ed18e84bbe72d9d903cc2e2bf6ece208\" name=\"ParentalMissionsDeny\" value=\"False\" /&gt;")
 		w.println("    &lt;entitlement code=\"02cf12485d5d938b4a6a141e995b72dcc61be3c51648a82cc9920c73dead69e2\" name=\"UnityEditorAllow\" value=\"True\" /&gt;")
@@ -205,15 +220,20 @@ class user(HttpServlet):
 		w.println("  &lt;/entitlements&gt;")
 		w.println("  &lt;prefs&gt;")
 		w.println("    &lt;pref&gt;")
-		w.println("      &lt;pref_id&gt;1&lt;/pref_id&gt;")
-		w.println("      &lt;value&gt;424999,414586,376099,350432&lt;/value&gt;")
+		prefSQL = "SELECT * FROM shso.user_prefs WHERE user_id = " + escapeQuotes(userID)
+		queryRes_prefs = db.executeQuery(prefSQL)
+		if (queryRes_prefs is not None and queryRes_prefs.size() > 0):
+			for row in queryRes_prefs:
+				pref_id = row.getItem("pref_id")
+				value = row.getItem("value")
+				w.println("      &lt;pref_id&gt;" + str(pref_id) + "&lt;/pref_id&gt;")
+				w.println("      &lt;value&gt;" + str(value) + "&lt;/value&gt;")
 		w.println("    &lt;/pref&gt;")
 		w.println("  &lt;/prefs&gt;")
 		w.println("  &lt;heroes&gt;")
 
 
 		# loop thru owned characters
-
 		if (queryRes2.size() > 0):
 			for row in queryRes2:
 				heroname = row.getItem("Name")
@@ -228,7 +248,20 @@ class user(HttpServlet):
 				w.println("          &lt;code&gt;" + str(code) + "&lt;/code&gt;")
 				w.println("        &lt;/hero&gt;")
 
-
+		reskins_sql = "select reskin_name, heroes.xp, heroes.tier, heroes.code from reskins, heroes where LOCATE(name, reskin_name) != 0 AND UserID = " + escapeQuotes(userID)
+		reskinsRes = db.executeQuery(reskins_sql)
+		if reskinsRes is not None and reskinsRes.size() > 0:
+			for reskin_row in reskinsRes:
+				heroname = reskin_row.getItem("reskin_name")
+				xp = reskin_row.getItem("Xp")
+				tier = reskin_row.getItem("Tier")
+				code = 'Reskin'
+				w.println("        &lt;hero&gt;")
+				w.println("          &lt;name&gt;" + str(heroname) + "&lt;/name&gt;")
+				w.println("          &lt;xp&gt;" + str(xp) + "&lt;/xp&gt;")
+				w.println("          &lt;tier&gt;" + str(tier) + "&lt;/tier&gt;")
+				w.println("          &lt;code&gt;" + str(code) + "&lt;/code&gt;")
+				w.println("        &lt;/hero&gt;")
 		w.println("  &lt;/heroes&gt;")
 		w.println("  &lt;currency&gt;")
 		w.println("    &lt;tokens&gt;0&lt;/tokens&gt;")

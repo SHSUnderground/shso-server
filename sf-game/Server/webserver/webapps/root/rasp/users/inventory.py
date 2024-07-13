@@ -12,7 +12,7 @@ import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper
 ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
-sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
+sys.path.append('sf-game/Server/webserver/webapps/root/pylibcsp')
 import pylibcsp 
 
 def escapeQuotes(string):
@@ -40,7 +40,7 @@ class inventory(HttpServlet):
 		if (pylibcsp.ipcheck(False)):   # don't process request if not a valid client
 			return
 		# fileList = ["POST Request Recieved"]
-		# outfile = open("sf-game/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
+		# outfile = open("/sf-game/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
 		# outfile.writelines(fileList)
 		# outfile.close()
 		# userID = None
@@ -79,7 +79,7 @@ class inventory(HttpServlet):
 		# Get db record for this player
 		error = ""
 		usersStr = ""
-		sql = "SELECT user.* FROM shso.user user WHERE user.ID = " + escapeQuotes(userID) 
+		sql = "SELECT user.* FROM shso.user user WHERE user.ID = " + escapeQuotes(userID)
 
 		queryRes = db.executeQuery(sql)
 		if (queryRes == None) or (queryRes.size() == 0):
@@ -88,10 +88,10 @@ class inventory(HttpServlet):
 		# Get all owned characters for this player
 		error = ""
 		usersStr = ""
-		sql = "SELECT shso.inventory.* FROM shso.inventory, shso.user WHERE shso.inventory.UserID = shso.user.ID AND shso.user.ID = " + escapeQuotes(userID) 
+		inventorysql = "SELECT shso.inventory.* FROM shso.inventory, shso.user WHERE category != 'card' AND shso.inventory.UserID = shso.user.ID AND shso.user.ID = " + escapeQuotes(userID)
 
 
-		queryRes2 = db.executeQuery(sql)
+		queryRes2 = db.executeQuery(inventorysql)
 		if (queryRes2 == None) or (queryRes2.size() == 0):
 			error = "db query failed"
 
@@ -155,7 +155,7 @@ class inventory(HttpServlet):
 		w.println("\n  &lt;/masterinventory&gt;")
 		w.println("\n</body>")
 		w.println("\n</response>")
-		# outfile = open("sf-game/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
+		# outfile = open("/sf-game/Server/webserver/webapps/root/rasp/inventoryresult.txt", "w")
 		# outfile.writelines(fileList)
 		# outfile.close()
 

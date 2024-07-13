@@ -87,8 +87,8 @@ class set_pref(HttpServlet):
 				userID = tokenQuery[0].getItem("userID")
 
 
-		sql = "INSERT INTO user_prefs VALUES(" + escapeQuotes(userID) + ", " + escapeQuotes(pref_id) + ", " + escapeQuotes(value) + ") ON DUPLICATE KEY UPDATE pref_id=" + escapeQuotes(pref_id) + ", value=" + escapeQuotes(value) + ";"
-		success = db.executeQuery(sql)
+		sql = "INSERT INTO user_prefs VALUES(" + escapeQuotes(userID) + ", " + escapeQuotes(pref_id) + ", '" + escapeQuotes(value) + "') ON DUPLICATE KEY UPDATE pref_id=" + escapeQuotes(pref_id) + ", value='" + escapeQuotes(value) + "';"
+		success = db.executeCommand(sql)
 		w = response.getWriter()
 
 		w.println("<response>")

@@ -104,19 +104,20 @@ def handleCloseRoom(params, who, roomId):
 
 
 def handleGetSeat(params, who, roomId):
-	_server.trace("getSeat params[0]=" + params[0])	
+	# _server.trace("getSeat params[0]=" + params[0])	
 
 	user = who
 	zone = _server.getCurrentZone()
 	
 
+	_server.trace(params[0])
 	### TEMPORARY KLUDGE INSTEAD OF PARSING XML  ###### 
-	if  "<game>BRAWLER</game>" in params[0]:
+	if  "<game>BRAWLER</game>" in params[0] or "<game>CARD</game>" in params[0]:
 		_server.trace("Calling sendRoomList() brawler!")
 
 		#mission = (params[0].split("<mission>"))[1].split("</mission>")[0]
 		mission = getNodeData(params, "mission")
-		_server.trace("mission =" + mission)
+		# _server.trace("mission =" + mission)
 
 		# mayhem missions always get their own room, with max users set to 1
 		# MAKE SURE TO MODIFY MULTIPLAYER MISSIONS SECTION TO CHECK MAX USERS ALLOWED IN ROOM
@@ -150,8 +151,8 @@ def handleGetSeat(params, who, roomId):
 			
 			shsoID = getNodeData(params, "player_id")
 			allowedUsers = getNodeData(params, "allowed_users")
-			_server.trace("shsoID: " + shsoID)
-			_server.trace("allowedUsers: " + allowedUsers)
+			# _server.trace("shsoID: " + shsoID)
+			# _server.trace("allowedUsers: " + allowedUsers)
 
 			if allowedUsers == "0":  # 0 means allow anyone, so this is request for daily mission
 				# loop thru existing game rooms (that are hosting the same mission name) and see if any are not full....
@@ -160,7 +161,7 @@ def handleGetSeat(params, who, roomId):
 				for room in allRooms:
 					if room.isGame():
 						roomMission = room.getVariable("mission").getValue()
-						_server.trace("roomMission =" + roomMission)
+						# _server.trace("roomMission =" + roomMission)
 					else:
 						roomMission = ""
 						_server.trace("roomMission = <not game room>")
@@ -168,7 +169,6 @@ def handleGetSeat(params, who, roomId):
 					if (room.getUserCount() < room.getMaxUsers()) and (room.isGame()) and (roomMission == mission):
 						try:
 							if (room.properties.get("closed") is None):
-								_server.trace("Room: " + str(room.getId()) + "Closed = None")
 								roomVar = room.getVariable("invitees")
 								if (roomVar is None): # ignore for rooms that have invitees, daily mission players not allowed there
 									allRoomsFull = False
@@ -271,7 +271,8 @@ def handleGetSeat(params, who, roomId):
 							response["_cmd"] = "notification"
 							response["message_type"] = "brawler_invitation"
 							response["inviter_id"] = shsoID
-							response["invitation_id"] = "1103"
+							# response["invitation_id"] = "1103"
+							response["invitation_id"] = shsoID
 							response["inviter_name"] = getPlayerName(shsoID)
 							response["mission"] = mission
 	
@@ -282,12 +283,15 @@ def handleGetSeat(params, who, roomId):
 					allRooms = zone.getRooms()
 					roomToUse = None
 					for room in allRooms:
+						# _server.trace("Room mission" + str(room.getVariable("mission")))
+						# _server.trace("CORRECT mission" + mission)
+
 						roomVar = room.getVariable("invitees")
 						invitees = None
-						if (roomVar is not None):
+						if (roomVar is not None and room.getVariable("mission") is not None):
 							invitees = roomVar.getValue()
-							_server.trace("roomVar invitees= " + invitees)
-							if shsoID in invitees: # player has been invited to this room
+							# _server.trace("roomVar invitees= " + invitees)
+							if shsoID in invitees and not room.properties.get("closed") and room.getVariable("mission").getValue() == mission: # player has been invited to this room
 								roomToUse = room
 								break
 					# no room was found for this invitee, so just return...

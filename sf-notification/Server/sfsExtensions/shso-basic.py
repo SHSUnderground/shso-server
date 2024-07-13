@@ -11,7 +11,7 @@ def init():
 	global validCliVer
 
 	srvVer = "00.00.017"
-	validCliVer = "00.00.017"
+	validCliVer = ["18.0"]
 	cmdMap = {"ping": handlePing, "keepAlive": handleKeepAlive }
 	
 	db = _server.getDatabaseManager()
@@ -61,7 +61,7 @@ def handleInternalEvent(evt):
 			
 			#if client version isnt what is expected, do the following:
 			valid = False
-			if (cliVer == validCliVer):
+			if (cliVer >= validCliVer):
 				valid = True
 			if valid == False:
 				user = _server.getUserByChannel(chan)
@@ -93,9 +93,11 @@ def handleInternalEvent(evt):
 		checkSQL = "SELECT * FROM user WHERE username = '" + escapeQuotes(nick) + "' AND MD5(CONCAT('" + key + "', Password)) = '" + escapeQuotes(passw) + "';"
 		UserCheckQueryResult = db.executeQuery(checkSQL)
 		if (UserCheckQueryResult) and (UserCheckQueryResult.size() > 0):
-				queryRes = UserCheckQueryResult
+				queryRes = UserCheckQueryResult.get(0).getItem("Result")
+				_server.trace('User login request result: ' + str(result))
 				row = queryRes.get(0)
 				username = row.getItem("Username")
+				display_name = row.getItem("Nick")
 				playerID = row.getItem("ID")
 				paid = row.getItem("Paid")
 				dbpass = row.getItem("Password")
@@ -112,7 +114,10 @@ def handleInternalEvent(evt):
 					error = "Record insertion failed."
 				else:
 					response["_cmd"] = "logOK"
-					obj = _server.loginUser(nick, dbpass, chan)
+					if display_name is not None:
+						obj = _server.loginUser(display_name, dbpass, chan)
+					else:
+						obj = _server.loginUser(nick, dbpass, chan)
 							#if obj.success == true:
 					_server.trace("Calling getUserByChannel()!")
 					user = _server.getUserByChannel(chan)

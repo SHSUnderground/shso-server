@@ -15,7 +15,8 @@ import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper
 ex = it.gotoandplay.smartfoxserver.extensions.ExtensionHelper.instance()
 
 # note: smartfox is using python 2.2
-sys.path.append('sf-game/SFS_PRO_1.6.6/Server/webserver/webapps/root/pylibcsp')
+sys.path.append('sf-game/Server/webserver/webapps/root/pylibcsp')
+sys.path.append('sf-game/Server/webserver/webapps/root/rasp/users')
 import pylibcsp 
 
 def escapeQuotes(string):
@@ -87,6 +88,25 @@ class potion_persist(HttpServlet):
 		# 	if name == "request_id":
 		# 		request_id = request.getParameter(name)
 		# #target = 3900009  # temp for testing	
+		userID = None
+		session_token = None
+		#userID = "3870526"   # this line for doGet testing only !!!!!!!!!!!!!!!
+		for name in request.getParameterNames():
+			# if (name == "user"):
+				# userID = request.getParameter(name)
+			# if (name == "user_id"):
+				# userID = request.getParameter(name)
+			if (name == "AS_SESSION_KEY"):
+				session_token = request.getParameter(name)
+
+		if session_token is not None:
+			getUserID = "SELECT * from tokens WHERE token='" + escapeQuotes(session_token) + "'"
+			tokenQuery = db.executeQuery(getUserID)
+			# userID = None
+
+
+			if tokenQuery.size() > 0:
+				userID = tokenQuery[0].getItem("userID")
 
 		#200 = Normal Success, 250 means some effect has to be removed
 		#responseStatus = "200"
@@ -97,32 +117,33 @@ class potion_persist(HttpServlet):
 		shsoID = None
 		sfsID = None
 		
-		try:
-			for name in request.getParameterNames():
-				if name == "shsoid":   # AS_SESSION_KEY
-					shsoID = int(request.getParameter(name))
+		# try:
+		for name in request.getParameterNames():
+			if name == "shsoid":   # AS_SESSION_KEY
+				shsoID = int(request.getParameter(name))
 
-			sql = "select ownable_type_id, SfUserId, IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>"+escapeQuotes(str(potionDuration))+",'T','F') FROM active_players, active_potion_effects WHERE ShsoUserId="+escapeQuotes(str(shsoID))+";"
-			queryRes = db.executeQuery(sql)
-			if ( queryRes == None) or (queryRes.size() == 0):
-				pass
-			else:
-				#sfsID =  int(queryRes[0].getItem("SfUserID"));
-				for row in queryRes:
-					sfsID = int(row.getItem("SfUserID"))
-					if sfsID < 0 :
-						pass
-					else:
-						ownableID = int(row.getItem("ownable_type_id"))
-						expiredCheck = str(row.getItem("IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>60,'T','F')"))
-						if expiredCheck == "T":
-							#Potion has expired!!!
-							expiredPotions = expiredPotions +str(ownableID)+","+str(sfsID) + "|"
-							sql = "DELETE FROM active_potion_effects WHERE userid=" + escapeQuotes(str(playerID))
-							db.executeCommand(sql)
-		except Exception as e:
-			er = str(e)
-			_server.trace(er)
+		sql = "select ownable_type_id, SfUserId, IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>"+escapeQuotes(str(potionDuration))+",'T','F') FROM active_players, active_potion_effects WHERE ShsoUserId="+escapeQuotes(str(shsoID))+";"
+		queryRes = db.executeQuery(sql)
+		if ( queryRes == None) or (queryRes.size() == 0):
+			pass
+		else:
+			#sfsID =  int(queryRes[0].getItem("SfUserID"));
+			for row in queryRes:
+				sfsID = int(row.getItem("SfUserID"))
+				if sfsID < 0 :
+					pass
+				else:
+					ownableID = int(row.getItem("ownable_type_id"))
+					expiredCheck = str(row.getItem("IF(Timestampdiff(SQL_TSI_MINUTE,start_timestamp,current_timestamp)>60,'T','F')"))
+					if expiredCheck == "T":
+						#Potion has expired!!!
+						expiredPotions = expiredPotions +str(ownableID)+","+str(sfsID) + "|"
+						sql = "DELETE FROM active_potion_effects WHERE userid=" + escapeQuotes(str(userID))
+						db.executeCommand(sql)
+		# except Exception as e:
+		# 	pass
+			# er = str(e)
+			# _server.trace(er)
 
 		
 
@@ -143,18 +164,18 @@ class potion_persist(HttpServlet):
 		# w.println("  &lt;potion&gt;")
 		# w.println(responseBody)
 		# w.println("  &lt;/potion&gt;")
-		try:
-			if len(expiredPotions) > 0:
-				
-				
-				w.println(expiredPotions)
-				
+		# try:
+		if len(expiredPotions) > 0:
+			
+			
+			w.println(expiredPotions)
+			
 
-				#Remove that potion from the DB
-				#sql = "DELETE FROM active_potion_effects WHERE shsoid = " + str(shsoID) + " AND ownable_type_id = " str(potion[1])
-				#success = db.executeCommand(sql)"""
-		except Exception as e:
-			w.println(str(e))
+			#Remove that potion from the DB
+			#sql = "DELETE FROM active_potion_effects WHERE shsoid = " + str(shsoID) + " AND ownable_type_id = " str(potion[1])
+			#success = db.executeCommand(sql)"""
+		# except Exception as e:
+			# w.println(str(e))
 
 		#w.println("  &lt;/persist&gt;")
 		w.println(  "</body>")
