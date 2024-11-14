@@ -562,8 +562,8 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` (`FirstName`, `LastName`, `Username`, `Password`, `Age`, `Nick`, `ID`, `PlayerID`, `Email`, `LastLogin`, `IP`, `RegHash`, `RegConfirmed`, `PassHash`, `Paid`, `RegDate`, `Fractals`, `isBanned`) VALUES ('first','last','User','5f4dcc3b5aa765d61d8327deb882cf99',15,'nickname',0,NULL,'none','1999-01-01 00:00:00','255.255.255.0','random',1,'0',1,' 1999-01-01 00:00:00',10000,0);
-INSERT INTO `user` (`FirstName`, `LastName`, `Username`, `Password`, `Age`, `Nick`, `ID`, `PlayerID`, `Email`, `LastLogin`, `IP`, `RegHash`, `RegConfirmed`, `PassHash`, `Paid`, `RegDate`, `Fractals`, `isBanned`) VALUES ('first','last','Super_User','5f4dcc3b5aa765d61d8327deb882cf99',15,'nickname',0,NULL,'none','1999-01-01 00:00:00','255.255.255.0','random',1,'0',1,' 1999-01-01 00:00:00',10000,0);
+INSERT INTO `user` (`FirstName`, `LastName`, `Username`, `Password`, `Age`, `Nick`, `ID`, `PlayerID`, `Email`, `LastLogin`, `IP`, `RegHash`, `RegConfirmed`, `PassHash`, `Paid`, `RegDate`, `Fractals`, `isBanned`) VALUES ('first','last','User','5f4dcc3b5aa765d61d8327deb882cf99',15,NULL,0,'NULL','none','1999-01-01 00:00:00','255.255.255.0','random',1,'0',1,' 1999-01-01 00:00:00',10000,0);
+INSERT INTO `user` (`FirstName`, `LastName`, `Username`, `Password`, `Age`, `Nick`, `ID`, `PlayerID`, `Email`, `LastLogin`, `IP`, `RegHash`, `RegConfirmed`, `PassHash`, `Paid`, `RegDate`, `Fractals`, `isBanned`) VALUES ('first','last','Super_User','5f4dcc3b5aa765d61d8327deb882cf99',15,NULL,1,NULL,'none1','1999-01-01 00:00:00','255.255.255.0','random',1,'0',1,' 1999-01-01 00:00:00',10000,0);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
